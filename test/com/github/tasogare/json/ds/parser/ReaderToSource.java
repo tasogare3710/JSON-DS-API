@@ -1,0 +1,54 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+package com.github.tasogare.json.ds.parser;
+
+import java.io.BufferedReader;
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.github.tasogare.json.ds.parser.Source;
+
+public class ReaderToSource {
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+    }
+
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+    }
+
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    @After
+    public void tearDown() throws Exception {
+    }
+
+    @Test
+    public void test() throws IOException {
+        InputStream is = getClass().getClassLoader().getResourceAsStream("com/github/tasogare/json/ds/parser/resources/ReaderTest.txt");
+        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+            final Source source = new Source(r);
+            final CharArrayWriter caw = new CharArrayWriter();
+            int codePoint;
+            while((codePoint = source.next()) != Source.EOF){
+                caw.write(Character.toChars(codePoint));
+            }
+            System.out.println(caw.toString());
+        }
+    }
+
+}

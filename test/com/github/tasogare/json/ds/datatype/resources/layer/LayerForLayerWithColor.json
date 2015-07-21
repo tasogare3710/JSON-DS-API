@@ -1,0 +1,21 @@
+
+{
+    "name":"test",
+    "frame":"./test.png",
+    "x":0,
+    "y":0,
+    "replaceKey":{
+        "red":1.0,
+        "green":0.0,
+        "blue":1.0,
+        "opacity":1.0
+    },
+    "replaceColor":{
+        "Color":{
+            "red":0.0,
+            "green":0.0,
+            "blue":0.0,
+            "opacity":1.0
+        }
+    }
+}

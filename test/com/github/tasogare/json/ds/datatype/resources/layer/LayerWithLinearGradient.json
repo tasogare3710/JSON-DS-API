@@ -1,0 +1,43 @@
+
+{
+    "name":"test",
+    "frame":"./test.png",
+    "x":0,
+    "y":0,
+    "replaceKey":{
+        "red":1.0,
+        "green":0.0,
+        "blue":1.0,
+        "opacity":1.0
+    },
+    "replaceColor":{
+        "LinearGradient":{
+            "startX":0.0,
+            "startY":0.0,
+            "endX":1.0,
+            "endY":0.0,
+            "proportional":true,
+            "cycleMethod":"NO_CYCLE",
+            "stops":[
+                {
+                    "offset":0.0,
+                    "color":{
+                        "red":0.0,
+                        "green":0.0,
+                        "blue":0.0,
+                        "opacity":1.0
+                    }
+                },
+                {
+                    "offset":1.0,
+                    "color":{
+                        "red":1.0,
+                        "green":0.0,
+                        "blue":0.0,
+                        "opacity":1.0
+                    }
+                }
+            ]
+        }
+    }
+}

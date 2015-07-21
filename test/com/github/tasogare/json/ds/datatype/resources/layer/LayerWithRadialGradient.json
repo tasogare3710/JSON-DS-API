@@ -1,0 +1,44 @@
+
+{
+    "name":"test",
+    "frame":"./test.png",
+    "x":0,
+    "y":0,
+    "replaceKey":{
+        "red":1.0,
+        "green":0.0,
+        "blue":1.0,
+        "opacity":1.0
+    },
+    "replaceColor":{
+        "RadialGradient":{
+            "focusAngle":0.0,
+            "focusDistance":1.0,
+            "centerX":0.0,
+            "centerY":0.0,
+            "radius":2.0,
+            "proportional":true,
+            "cycleMethod":"NO_CYCLE",
+            "stops":[
+                {
+                    "offset":0.0,
+                    "color":{
+                        "red":0.0,
+                        "green":0.0,
+                        "blue":0.0,
+                        "opacity":1.0
+                    }
+                },
+                {
+                    "offset":1.0,
+                    "color":{
+                        "red":1.0,
+                        "green":0.0,
+                        "blue":0.0,
+                        "opacity":1.0
+                    }
+                }
+            ]
+        }
+    }
+}
