@@ -112,7 +112,7 @@ public class JsonDsProcessorHoistableTestDriver implements DatatypeSchemaProcess
         @Override
         public <D extends AstNode & DirectiveNode<D>> Type visit(ProgramNode<D> node) {
             if(node.getPragmas().isEmpty()){
-                throw new JsonDsException("variantプラグマがありません", StandardErrors.SyntaxError);
+                throw new JsonDsException("Useプラグマがありません", StandardErrors.SyntaxError);
             }
             for(final PragmaNode p : node.getPragmas()){
                 p.accept(this);
