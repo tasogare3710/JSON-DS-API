@@ -44,6 +44,10 @@ public class TokenStream {
         return currentToken;
     }
 
+    public Source getSource() {
+        return source;
+    }
+
     public int length() {
         return source.length();
     }
@@ -59,7 +63,150 @@ public class TokenStream {
         pendding = t;
     }
 
-    public Token scanToken(Token... ignore) {
+    /**
+     * この段階ではVirtual-Semicolonを挿入しない
+     * 
+     * @return
+     */
+    public Token scanToken() {
+        if(pendding != null){
+            return popPendding();
+        }
+
+        int c;
+        while (true) {
+            c = source.next();
+            if (c == Source.EOF) {
+                return currentToken(Token.Eof);
+            }
+            if (Source.isWhitespace(c)) {
+                continue;
+            }
+            // LineTerminatorSequence ::
+            // <LF>
+            // <CR> [lookahead ≠ <LF> ]
+            // <LS>
+            // <PS>
+            // <CR> <LF>
+            if (Source.isLineTerminator(c)) {
+                if (c == 0x000D && source.matchWithAdvance(0x000A)) {
+                    return currentToken(Token.LineTerminator);
+                }
+                return currentToken(Token.LineTerminator);
+            }
+            break;
+        }
+
+        switch (c) {
+        case '"':
+            return currentToken(readStringLiteral());
+        case '\\':
+            source.mustMatchWithAdvance('u');
+            c = readUnicodeEscape();
+            if (Source.isIdentifierStart(c)) {
+                return currentToken(readIdentifier(c, true));
+            }
+            //TODO: 11.6.1.1 - Static Semantics: Early Errors
+            throw new SourceException();
+        case '/':
+            // Comment ::
+            // MultiLineComment
+            // SingleLineComment
+            if (source.matchWithAdvance('/')) {
+                return currentToken(readSingleLineComment());
+            } else if (source.matchWithAdvance('*')) {
+                return currentToken(readMultiLineComment());
+            }
+            break;
+        case '{':
+            return currentToken(Token.LBrace);
+        case '}':
+            return currentToken(Token.RBrace);
+        case '(':
+            return currentToken(Token.LParen);
+        case ')':
+            return currentToken(Token.RParen);
+        case '[':
+            return currentToken(Token.LBracket);
+        case ']':
+            return currentToken(Token.RBracket);
+        case '.':
+            source.mustMatchWithAdvance('.');
+            source.mustMatchWithAdvance('.');
+            return currentToken(Token.TripleDot);
+        case ',':
+            return currentToken(Token.Comma);
+        case ':':
+            return currentToken(Token.Colon);
+        case ';':
+            return currentToken(Token.SemiColon);
+        case '?':
+            return currentToken(Token.Nullable);
+        case '!':
+            return currentToken(Token.NotNullable);
+        case '=':
+            return currentToken(Token.Assign);
+        case '*':
+            return currentToken(Token.Any);
+        case '|':
+            return currentToken(Token.Or);
+        case 't':
+            if (source.matchWithAdvance('y')) {
+                if (source.matchWithAdvance('p')) {
+                    if (source.matchWithAdvance('e')) {
+                        return currentToken(Token.TypeOperator);
+                    } else {
+                        source.pushback(2);
+                        break;
+                    }
+                } else {
+                    source.pushback(1);
+                    break;
+                }
+            } else {
+                break;
+            }
+        case 'u':
+            if (source.matchWithAdvance('s')) {
+                if (source.matchWithAdvance('e')) {
+                    return currentToken(Token.UsePragma);
+                } else {
+                    source.pushback(1);
+                    break;
+                }
+            } else {
+                break;
+            }
+        case 'n':
+            if (source.matchWithAdvance('u')) {
+                if (source.matchWithAdvance('l')) {
+                    if (source.matchWithAdvance('l')) {
+                        return currentToken(Token.Null);
+                    } else {
+                        source.pushback(2);
+                        break;
+                    }
+                } else {
+                    source.pushback(1);
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        if (Source.isIdentifierStart(c)) {
+            return currentToken(readIdentifier(c, false));
+        }
+        //TODO: 11.6.1.1 - Static Semantics: Early Errors
+        throw new SourceException();
+    }
+
+    /**
+     * 
+     * @param ignore 無視するトークン
+     * @return
+     */
+    public Token scanTokenWithoutOf(Token... ignore) {
         final List<Token> skips = Arrays.asList(ignore);
         final boolean commentSkip = skips.contains(Token.Comment);
         final boolean identifierSkip = skips.contains(Token.Identifier);
@@ -68,23 +215,19 @@ public class TokenStream {
 
         Token t = null;
         do {
-            t = (pendding != null) ? popPendding() : scanToken();
+            t = scanToken();
             // スキップしたトークンが文字列contentを持つ場合TokenStreamのバッファをクリアしなければならない
             //@formatter:off
-            if (commentSkip             && t == Token.Comment || 
-                identifierSkip              && t == Token.Identifier ||
+            if (commentSkip           && t == Token.Comment            ||
+                identifierSkip        && t == Token.Identifier         ||
                 escapedIdentifierSkip && t == Token.EscapedIdentifier ||
-                stringLiteralSkip         && t == Token.StringLiteral)
+                stringLiteralSkip     && t == Token.StringLiteral      )
             {
                 buffer.reset();
             }
             //@formatter:on
         } while (skips.contains(t));
         return t;
-    }
-
-    public Source getSource() {
-        return source;
     }
 
     private String asContentOf(Token t) {
@@ -121,6 +264,7 @@ public class TokenStream {
                 source.mustMatchWithAdvance('u');
                 c = readUnicodeEscape();
                 if (!Source.isIdentifierPart(c)) {
+                    //TODO: 11.6.1.1 - Static Semantics: Early Errors
                     throw new SourceException();
                 }
                 buffer.write(c);
@@ -336,137 +480,5 @@ public class TokenStream {
             throw new SourceException();
         }
         return c;
-    }
-
-    /**
-     * この段階ではVirtual-Semicolonを挿入しない
-     * 
-     * @return
-     */
-    private Token scanToken() {
-        int c;
-        while (true) {
-            c = source.next();
-            if (c == Source.EOF) {
-                return currentToken(Token.Eof);
-            }
-            if (Source.isWhitespace(c)) {
-                continue;
-            }
-            // LineTerminatorSequence ::
-            // <LF>
-            // <CR> [lookahead ≠ <LF> ]
-            // <LS>
-            // <PS>
-            // <CR> <LF>
-            if (Source.isLineTerminator(c)) {
-                if (c == 0x000D && source.matchWithAdvance(0x000A)) {
-                    return currentToken(Token.LineTerminator);
-                }
-                return currentToken(Token.LineTerminator);
-            }
-            break;
-        }
-
-        switch (c) {
-        case '"':
-            return currentToken(readStringLiteral());
-        case '\\':
-            source.mustMatchWithAdvance('u');
-            c = readUnicodeEscape();
-            if (Source.isIdentifierStart(c)) {
-                return currentToken(readIdentifier(c, true));
-            }
-            throw new SourceException();
-        case '/':
-            // Comment ::
-            // MultiLineComment
-            // SingleLineComment
-            if (source.matchWithAdvance('/')) {
-                return currentToken(readSingleLineComment());
-            } else if (source.matchWithAdvance('*')) {
-                return currentToken(readMultiLineComment());
-            }
-            break;
-        case '{':
-            return currentToken(Token.LBrace);
-        case '}':
-            return currentToken(Token.RBrace);
-        case '(':
-            return currentToken(Token.LParen);
-        case ')':
-            return currentToken(Token.RParen);
-        case '[':
-            return currentToken(Token.LBracket);
-        case ']':
-            return currentToken(Token.RBracket);
-        case '.':
-            source.mustMatchWithAdvance('.');
-            source.mustMatchWithAdvance('.');
-            return currentToken(Token.TripleDot);
-        case ',':
-            return currentToken(Token.Comma);
-        case ':':
-            return currentToken(Token.Colon);
-        case ';':
-            return currentToken(Token.SemiColon);
-        case '?':
-            return currentToken(Token.Nullable);
-        case '!':
-            return currentToken(Token.NotNullable);
-        case '=':
-            return currentToken(Token.Assign);
-        case '*':
-            return currentToken(Token.Any);
-        case '|':
-            return currentToken(Token.Or);
-        case 't':
-            if (source.matchWithAdvance('y')) {
-                if (source.matchWithAdvance('p')) {
-                    if (source.matchWithAdvance('e')) {
-                        return currentToken(Token.TypeOperator);
-                    } else {
-                        source.pushback(2);
-                        break;
-                    }
-                } else {
-                    source.pushback(1);
-                    break;
-                }
-            } else {
-                break;
-            }
-        case 'u':
-            if (source.matchWithAdvance('s')) {
-                if (source.matchWithAdvance('e')) {
-                    return currentToken(Token.UsePragma);
-                } else {
-                    source.pushback(1);
-                    break;
-                }
-            } else {
-                break;
-            }
-        case 'n':
-            if (source.matchWithAdvance('u')) {
-                if (source.matchWithAdvance('l')) {
-                    if (source.matchWithAdvance('l')) {
-                        return currentToken(Token.Null);
-                    } else {
-                        source.pushback(2);
-                        break;
-                    }
-                } else {
-                    source.pushback(1);
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-        if (Source.isIdentifierStart(c)) {
-            return currentToken(readIdentifier(c, false));
-        }
-        throw new SourceException();
     }
 }

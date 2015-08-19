@@ -84,7 +84,7 @@ public class Parser {
         //@formatter:on
         final ArrayList<PragmaNode> l = new ArrayList<>();
         Token t;
-        while (!isToken(t = ts.scanToken(Comment, LineTerminator), TypeOperator, EscapedTypeOperator)) {
+        while (!(t = ts.scanTokenWithoutOf(Comment, LineTerminator)).equals(TypeOperator, EscapedTypeOperator)) {
             ts.pushPendding(t);
             l.add(parsePragma());
         }
@@ -100,17 +100,17 @@ public class Parser {
         // UsePragma
         //      use PragmaItems
         //@formatter:on
-        Token t = ts.scanToken(Comment, LineTerminator);
-        if (!isToken(t, UsePragma, EscapedUsePragma)) {
+        Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
+        if (!t.equals(UsePragma, EscapedUsePragma)) {
             throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
         }
         final List<IdentifierNode> items = parsePragmaItems();
         final PragmaNode pragma = new PragmaNode(0, ts.postion(), items);
 
-        t = ts.scanToken(Comment);
+        t = ts.scanTokenWithoutOf(Comment);
         autoSemicolonInsertion(t);
 
-        t = ts.scanToken(Comment);
+        t = ts.scanTokenWithoutOf(Comment);
         if (t == Eof || t != SemiColon) {
             throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
         }
@@ -128,7 +128,7 @@ public class Parser {
         //      strict [ContextuallyReservedIdentifier]
         //      Identifier (UNUSED)
         //@formatter:on
-        Token t = ts.scanToken(Comment, LineTerminator);
+        Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t == SemiColon) {
             throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
         }
@@ -136,13 +136,13 @@ public class Parser {
 
         final List<IdentifierNode> l = new ArrayList<>();
         while (true) {
-            t = ts.scanToken(Comment);
+            t = ts.scanTokenWithoutOf(Comment);
             if (t == Eof) {
                 throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
             }
             // PragmaItem
             l.add(parseIdentifier());
-            t = ts.scanToken(Comment);
+            t = ts.scanTokenWithoutOf(Comment);
             if (t == SemiColon || t == LineTerminator) {
                 ts.pushPendding(t);
                 break;
@@ -173,7 +173,7 @@ public class Parser {
 
         final ArrayList<TypeDefinitionNode<? extends BasicTypeExpressionNode<?>>> directives = new ArrayList<>();
         Token t;
-        while ((t = ts.scanToken(Comment, LineTerminator)) != Eof) {
+        while ((t = ts.scanTokenWithoutOf(Comment, LineTerminator)) != Eof) {
             ts.pushPendding(t);
             directives.add(parseDirective());
         }
@@ -191,11 +191,11 @@ public class Parser {
         // TypeDefinition Semicolon
         final TypeDefinitionNode<T> td = parseTypeDefinition();
 
-        Token t = ts.scanToken(Comment);
+        Token t = ts.scanTokenWithoutOf(Comment);
         autoSemicolonInsertion(t);
 
-        t = ts.scanToken(Comment);
-        if (isToken(t, Eof, SemiColon)) {
+        t = ts.scanTokenWithoutOf(Comment);
+        if (t.equals(Eof, SemiColon)) {
             // 一度EOFを返したらそれ以降は何度でもEOFを返すのでpenddingは必要ない。
             return td;
         }
@@ -205,12 +205,12 @@ public class Parser {
     protected <T extends AstNode & BasicTypeExpressionNode<T>> TypeDefinitionNode<T> parseTypeDefinition() {
         // TypeDefinition
         // type Identifier TypeInitialisation
-        Token t = ts.scanToken(Comment, LineTerminator);
+        Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (!(t == TypeOperator || t == EscapedTypeOperator)) {
             throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
         }
 
-        t = ts.scanToken(Comment, LineTerminator);
+        t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (!(t == Identifier || t == EscapedIdentifier)) {
             throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
         }
@@ -242,7 +242,7 @@ public class Parser {
         // TypeInitialisation
         //      = TypeExpression
         //@formatter:on
-        Token t = ts.scanToken(Comment, LineTerminator);
+        Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t != Assign) {
             throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
         }
@@ -259,7 +259,7 @@ public class Parser {
         final T type = parseBasicTypeExpression();
 
         TypeExpressionNode.Nullability nullability = TypeExpressionNode.Nullability.Absent;
-        Token t = ts.scanToken(Comment);
+        Token t = ts.scanTokenWithoutOf(Comment);
         if (t == Nullable) {
             nullability = TypeExpressionNode.Nullability.Nullable;
         } else if (t == NotNullable) {
@@ -278,7 +278,7 @@ public class Parser {
         // UnionType
         // RecordType
         // ArrayType
-        switch (ts.scanToken(Comment, LineTerminator)) {
+        switch (ts.scanTokenWithoutOf(Comment, LineTerminator)) {
         case Any:
             return (T) new AnyTypeNode(ts.postion(), ts.postion());
         case Null:
@@ -342,7 +342,7 @@ public class Parser {
         //      TypeExpression | NonemptyTypeUnionList
         //@formatter:on
         final List<TypeExpressionNode<T>> list = new ArrayList<>();
-        Token t = ts.scanToken(Comment, LineTerminator);
+        Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         // TypeExpression | NonemptyTypeUnionList なので空の | は無効
         if (t == Or) {
             throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
@@ -357,7 +357,7 @@ public class Parser {
         while (true) {
             TypeExpressionNode<T> te = parseTypeExpression();
             list.add(te);
-            t = ts.scanToken(Comment, LineTerminator);
+            t = ts.scanTokenWithoutOf(Comment, LineTerminator);
             if (t == Eof) {
                 throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
             }
@@ -389,7 +389,7 @@ public class Parser {
      */
     protected <T extends AstNode & BasicTypeExpressionNode<T>> List<FieldTypeNode<T>> parseFieldTypeList() {
         final ArrayList<FieldTypeNode<T>> list = new ArrayList<>();
-        Token t = ts.scanToken(Comment, LineTerminator);
+        Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t == Comma) {
             // 空のカンマは許されない
             throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
@@ -400,14 +400,14 @@ public class Parser {
                 throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
             case StringLiteral:
                 list.add(parseFieldType());
-                t = ts.scanToken(Comment);
+                t = ts.scanTokenWithoutOf(Comment);
                 if (t == Comma || t == LineTerminator || t == RBrace) {
                     continue;
                 }
                 throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
             case LineTerminator:
             case Comma:
-                t = ts.scanToken(Comment);
+                t = ts.scanTokenWithoutOf(Comment);
                 continue;
             case RBrace:
                 return list;
@@ -424,7 +424,7 @@ public class Parser {
         //@formatter:on
         assert ts.getCurrentToken() == StringLiteral;
         final String name = ts.asStringLiteral();
-        Token t = ts.scanToken(Comment, LineTerminator);
+        Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         // FieldType := FieldName の形式を正しく処理してなかった
         // JSON-DSでは型注釈の付かないフィールドは許されない
         if (t != Colon) {
@@ -438,7 +438,7 @@ public class Parser {
 
     protected <T extends AstNode & BasicTypeExpressionNode<T>> ArrayTypeNode<T> parseArrayType() {
         assert ts.getCurrentToken() == LBracket;
-        Token t = ts.scanToken(Comment, LineTerminator);
+        Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         // spec-bug: JSON-DSでは [,,,]や[ , foo]という記述は許可されない
         if (t == Comma) {
             throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
@@ -471,12 +471,12 @@ public class Parser {
         final ArrayList<TypeExpressionNode<T>> list = new ArrayList<>();
         TypeExpressionNode<T> variableType = null;
         while (true) {
-            Token t = ts.scanToken(Comment, LineTerminator);
+            Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
             if (t == TripleDot) {
                 variableType = parseTypeExpression();
-                t = ts.scanToken(Comment, LineTerminator);
+                t = ts.scanTokenWithoutOf(Comment, LineTerminator);
                 if (t == Comma) {
-                    t = ts.scanToken(Comment, LineTerminator);
+                    t = ts.scanTokenWithoutOf(Comment, LineTerminator);
                     if (t != RBracket) {
                         throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
                     }
@@ -489,9 +489,9 @@ public class Parser {
             } else {
                 ts.pushPendding(t);
                 list.add(parseTypeExpression());
-                t = ts.scanToken(Comment, LineTerminator);
+                t = ts.scanTokenWithoutOf(Comment, LineTerminator);
                 if (t == Comma) {
-                    t = ts.scanToken(Comment, LineTerminator);
+                    t = ts.scanTokenWithoutOf(Comment, LineTerminator);
                     if (t == RBracket) {
                         break;
                     }
@@ -504,16 +504,6 @@ public class Parser {
             }
         }
         return new ArrayTypeNode<T>(ts.postion(), ts.postion(), list, variableType);
-    }
-
-    private boolean isToken(Token actual, Token... expected) {
-        assert expected.length > 0;
-        for (int i = 0; i < expected.length; i++) {
-            if (expected[i] == actual) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

@@ -4,27 +4,43 @@
 
 package com.github.tasogare.json.ds.parser;
 
-import java.io.BufferedReader;
+import static java.lang.Character.isJavaIdentifierPart;
+import static java.lang.Character.isJavaIdentifierStart;
+
 import java.io.IOException;
+import java.io.Reader;
 import java.io.UncheckedIOException;
 
 /**
- * raw入力sourceのラッパー。
+ * raw input source wrapper class.
  * 
  * @author tasogare
  *
  */
 public final class Source {
 
-    public static final int BOM = '\uFEFF';
     public static final int EOF = -1;
 
-    public static boolean isIdentifierPart(int c) {
-        return Character.isJavaIdentifierPart(c);
+    /**
+     * 
+     * @param cp
+     * @return
+     * @see ES2015 - 11.6  Names and Keywords
+     */
+    public static boolean isIdentifierPart(int cp) {
+        // 実験的にUnicode properties "Other_ID_Start" と "Other_ID_Continue" をサポート
+        return isJavaIdentifierPart(cp) || isUnicodeOtherIdentifierStart(cp) || isUnicodeOtherIdentifierPart(cp);
     }
 
-    public static boolean isIdentifierStart(int c) {
-        return Character.isJavaIdentifierStart(c);
+    /**
+     * 
+     * @param cp
+     * @return
+     * @see ES2015 - 11.6  Names and Keywords
+     */
+    public static boolean isIdentifierStart(int cp) {
+        // 実験的にUnicode properties "Other_ID_Start" と "Other_ID_Continue" をサポート
+        return isJavaIdentifierStart(cp) || isUnicodeOtherIdentifierStart(cp);
     }
 
     /**
@@ -69,33 +85,77 @@ public final class Source {
      * 
      * @param c
      * @return
-     * @see ES6 spec section 11.2 White Space - Table 32 - White Space Code
-     *      Points
+     * @see ES6 spec section 11.2 White Space - Table 32 - White Space Code Points
      */
     public static boolean isWhitespace(final int c) {
         return (c == 0x09 || c == 0x0B || c == 0x0C || c == 0x20) || c == 0xA0 || c == 0xFEFF || isSpaceSeparator(c);
     }
 
     /**
-     * {@code reader}はこのメソッド内ですべて消費され、そののち閉じられます。
      * 
      * @param reader
      * @return
      * @throws UncheckedIOException
      */
-    private static String fromReader(final BufferedReader reader) throws UncheckedIOException {
+    private static String fromReader(final Reader reader) throws UncheckedIOException {
         final char[] cbuff = new char[5120];
         final StringBuilder sb = new StringBuilder(5120);
         try {
-            int len;
-            while ((len = reader.read(cbuff)) != -1) {
-                sb.append(cbuff, 0, len);
+            int advance;
+            while ((advance = reader.read(cbuff)) != -1) {
+                sb.append(cbuff, 0, advance);
             }
-            reader.close();
             return sb.toString();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    /**
+     * Other_ID_Continue (Unicode 8.0.0)
+     * 
+     * <pre>
+     * U+1369 ETHIOPIC DIGIT ONE...U+1371 ETHIOPIC DIGIT NINE
+     * U+00B7 ( · ) MIDDLE DOT
+     * U+0387 ( · ) GREEK ANO TELEIA
+     * U+19DA ( ᧚ ) NEW TAI LUE THAM DIGIT ONE
+     * </pre>
+     * 
+     * @param cp code point
+     * @return
+     * @see http://www.unicode.org/reports/tr31/
+     */
+    private static boolean isUnicodeOtherIdentifierPart(int cp) {
+        return '\u1369' == cp ||
+                '\u136A' == cp ||
+                '\u136B' == cp ||
+                '\u136C' == cp ||
+                '\u136D' == cp ||
+                '\u136E' == cp ||
+                '\u136F' == cp ||
+                '\u1370' == cp ||
+                '\u1371' == cp ||
+                '\u00B7' == cp ||
+                '\u0387' == cp ||
+                '\u19DA' == cp;
+    }
+
+    /**
+     * Other_ID_Start (Unicode 8.0.0)
+     * 
+     * <pre>
+     * U+2118 ( ℘ ) SCRIPT CAPITAL P
+     * U+212E ( ℮ ) ESTIMATED SYMBOL
+     * U+309B ( ゛ ) KATAKANA-HIRAGANA VOICED SOUND MARK
+     * U+309C ( ゜ ) KATAKANA-HIRAGANA SEMI-VOICED SOUND MARK
+     * </pre>
+     * 
+     * @param cp code point
+     * @return
+     * @see http://www.unicode.org/reports/tr31/
+     */
+    private static boolean isUnicodeOtherIdentifierStart(int cp) {
+        return '\u2118' == cp || '\u212e' == cp || '\u309b' == cp || '\u309c' == cp;
     }
 
     private final String source;
@@ -109,7 +169,7 @@ public final class Source {
      * @param raw
      * @throws UncheckedIOException
      */
-    public Source(final BufferedReader raw) throws UncheckedIOException {
+    public Source(final Reader raw) throws UncheckedIOException {
         this(fromReader(raw));
     }
 

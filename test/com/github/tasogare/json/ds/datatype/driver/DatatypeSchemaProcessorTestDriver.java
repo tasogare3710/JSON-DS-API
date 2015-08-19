@@ -4,7 +4,7 @@
 
 package com.github.tasogare.json.ds.datatype.driver;
 
-import java.io.BufferedReader;
+import java.io.Reader;
 
 /**
  * JSON-DS API仕様にはプロセッサが含まれないためテスト・ドライバが必要
@@ -22,8 +22,15 @@ public interface DatatypeSchemaProcessorTestDriver {
     /**
      * TODO throws宣言必要
      * @param jsds
-     * @param fileName
+     * @param sourceName
      */
-    void process(BufferedReader jsds, String fileName);
+    void process(Reader jsds, String sourceName);
+
+    /**
+     * TODO throws宣言必要
+     * @param jsds
+     * @param sourceName
+     */
+    void process(String jsds, String sourceName);
 
 }

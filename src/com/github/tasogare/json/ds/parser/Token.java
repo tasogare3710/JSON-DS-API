@@ -70,4 +70,18 @@ public enum Token {
     public Token toEscaped() {
         throw new AssertionError();
     }
+
+    /**
+     * @param expected
+     * @return
+     */
+    boolean equals(Token... expected) {
+        assert expected.length > 0;
+        for (int i = 0; i < expected.length; i++) {
+            if (expected[i] == this) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

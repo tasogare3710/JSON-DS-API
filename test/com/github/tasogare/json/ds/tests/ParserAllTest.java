@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import com.github.tasogare.json.ds.parser.IdentifierTest;
 import com.github.tasogare.json.ds.parser.ParserTest;
 import com.github.tasogare.json.ds.parser.ReaderToSource;
 import com.github.tasogare.json.ds.parser.SourceOfZeroTest;
@@ -16,6 +17,7 @@ import com.github.tasogare.json.ds.parser.TokenStreamTest;
 @RunWith(Suite.class)
 @SuiteClasses({
     ParserTest.class,
+    IdentifierTest.class,
     ReaderToSource.class,
     SourceOfZeroTest.class,
     TokenStreamTest.class

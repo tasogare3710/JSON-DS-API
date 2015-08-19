@@ -60,75 +60,67 @@ public class JsonDsProcessorTest {
 
     @Test
     public void test2() throws IOException, JsonDsException {
-        final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
         final String source = "use standard; type JSON = [number, string, boolean, ...number]";
-        try (final BufferedReader sr = new BufferedReader(new StringReader(source))) {
-            processor.process(sr, "<string buffer>");
-            final String name = "com/github/tasogare/json/ds/datatype/resources/mixed.json";
-            final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-            try (final BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-                final JsonStructure json = Json.createReader(r).read();
-                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
-                final Type jsonType = typeSystem.getMetaObject("JSON");
+        final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
+        processor.process(source, "<string buffer>");
+        final String name = "com/github/tasogare/json/ds/datatype/resources/mixed.json";
+        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+        try (final BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            final JsonStructure json = Json.createReader(r).read();
+            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
+            final Type jsonType = typeSystem.getMetaObject("JSON");
 
-                assertTrue(typeSystem.is(json, jsonType));
-            }
+            assertTrue(typeSystem.is(json, jsonType));
         }
     }
 
     @Test
     public void test3() throws IOException, JsonDsException {
-        final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
         final String source = "use standard; type JSON = [...*!]";
-        try (final BufferedReader sr = new BufferedReader(new StringReader(source))) {
-            processor.process(sr, "<string buffer>");
-            try (final BufferedReader r = new BufferedReader(new StringReader("[null]"))) {
-                final JsonStructure json = Json.createReader(r).read();
-                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
-                final Type jsonType = typeSystem.getMetaObject("JSON");
+        final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
+        processor.process(source, "<string buffer>");
+        try (final BufferedReader r = new BufferedReader(new StringReader("[null]"))) {
+            final JsonStructure json = Json.createReader(r).read();
+            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
+            final Type jsonType = typeSystem.getMetaObject("JSON");
 
-                assertFalse(typeSystem.is(json, jsonType));
-            }
+            assertFalse(typeSystem.is(json, jsonType));
         }
     }
 
     @Test
     public void testInvalid() throws IOException, JsonDsException {
         final String source = "use standard; type JSON = {\"first\": string, \"last\": string, \"age\": number}";
-        try (final BufferedReader r = new BufferedReader(new StringReader(source))) {
-            final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
-            processor.process(r, "<string-buffer>");
+        final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
+        processor.process(source, "<string-buffer>");
 
-            final String name = "com/github/tasogare/json/ds/datatype/resources/Person.json";
-            final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-            try(final BufferedReader r2 = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
+        final String name = "com/github/tasogare/json/ds/datatype/resources/Person.json";
+        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+        try(final BufferedReader r2 = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
 
-                final Type jsonType = typeSystem.getMetaObject("JSON");
-                final JsonStructure json = Json.createReader(r2).read();
+            final Type jsonType = typeSystem.getMetaObject("JSON");
+            final JsonStructure json = Json.createReader(r2).read();
 
-                assertFalse(typeSystem.is(json, jsonType));
-            }
+            assertFalse(typeSystem.is(json, jsonType));
         }
     }
 
     @Test
     public void testValid() throws IOException, JsonDsException {
         final String source = "use standard; type JSON = {\"first\": string?, \"last\": string, \"age\": number}";
-        try (final BufferedReader r = new BufferedReader(new StringReader(source))) {
-            final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
-            processor.process(r, "<string-buffer>");
+        final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
+        processor.process(source, "<string-buffer>");
 
-            final String name = "com/github/tasogare/json/ds/datatype/resources/Person.json";
-            final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-            try(final BufferedReader r2 = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
+        final String name = "com/github/tasogare/json/ds/datatype/resources/Person.json";
+        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+        try(final BufferedReader r2 = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
 
-                final Type jsonType = typeSystem.getMetaObject("JSON");
-                final JsonStructure json = Json.createReader(r2).read();
+            final Type jsonType = typeSystem.getMetaObject("JSON");
+            final JsonStructure json = Json.createReader(r2).read();
 
-                assertTrue(typeSystem.is(json, jsonType));
-            }
+            assertTrue(typeSystem.is(json, jsonType));
         }
     }
 

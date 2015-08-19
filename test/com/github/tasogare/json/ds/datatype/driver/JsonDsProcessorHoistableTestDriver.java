@@ -10,7 +10,7 @@ import static com.github.tasogare.json.ds.datatype.Intrinsics.nonNullableAnyType
 import static com.github.tasogare.json.ds.datatype.Intrinsics.nullType;
 import static com.github.tasogare.json.ds.datatype.Intrinsics.undefindType;
 
-import java.io.BufferedReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -302,10 +302,20 @@ public class JsonDsProcessorHoistableTestDriver implements DatatypeSchemaProcess
     }
 
     @Override
-    public void process(BufferedReader jsds, String fileName){
+    public void process(String jsds, String sourceName){
         final Source source = new Source(jsds);
         final TokenStream ts = new TokenStream(source);
-        final Parser parser = new Parser(ts, fileName);
+        final Parser parser = new Parser(ts, sourceName);
+        final ProgramNode<?> p = parser.parse();
+        one.visit(p);
+        two.visit(p);
+    }
+
+    @Override
+    public void process(Reader jsds, String sourceName){
+        final Source source = new Source(jsds);
+        final TokenStream ts = new TokenStream(source);
+        final Parser parser = new Parser(ts, sourceName);
         final ProgramNode<?> p = parser.parse();
         one.visit(p);
         two.visit(p);
