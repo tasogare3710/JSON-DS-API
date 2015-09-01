@@ -10,6 +10,11 @@ import java.util.List;
 
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 
+/**
+ * FIXME: 将来の変更のためにプラグマ名を持つようにする必要がある
+ * @author tasogare
+ *
+ */
 public class PragmaNode extends AstNode implements Cloneable {
 
     //ContextuallyReservedIdentifierNode is IdentifierNodeとなる

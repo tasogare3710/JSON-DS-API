@@ -10,6 +10,8 @@ import java.util.List;
 
 public class ArrayType implements StructuralType {
 
+    //XXX fixedElementsとvariableElementsを持っていないときの値が何になるかは今のところ実装依存
+    //TODO fixedElementsやvariableElementsを持っているかどうかを調べるメソッドが必要か？
     final List<Type> fixedElements;
     final Type variableElements;
 

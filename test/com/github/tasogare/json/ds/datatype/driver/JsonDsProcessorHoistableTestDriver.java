@@ -98,6 +98,7 @@ public class JsonDsProcessorHoistableTestDriver implements DatatypeSchemaProcess
 
         @Override
         public Type visit(PragmaNode node) {
+            //FIXME: use pragma決め打ち
             for (final IdentifierNode iden : node.getPragmaItems()) {
                 if (iden instanceof ContextuallyReservedIdentifierNode) {
                     if (((ContextuallyReservedIdentifierNode) iden).isStandard()) {
@@ -290,33 +291,33 @@ public class JsonDsProcessorHoistableTestDriver implements DatatypeSchemaProcess
         }
     }
 
-    private Variant complianceVariant;
+    protected Variant complianceVariant;
     private final JsonMetaObjectTestDriver metaObjects;
-    private final PassOne one;
-    private final PassTwo two;
+
+    public JsonDsProcessorHoistableTestDriver(JsonMetaObjectTestDriver metaObjects) {
+        this.metaObjects = metaObjects;
+    }
 
     public JsonDsProcessorHoistableTestDriver() {
-        metaObjects = new JsonMetaObjectTestDriver();
-        one = new PassOne();
-        two = new PassTwo();
+        this(new JsonMetaObjectTestDriver());
     }
 
     @Override
     public void process(String jsds, String sourceName){
-        final Source source = new Source(jsds);
-        final TokenStream ts = new TokenStream(source);
-        final Parser parser = new Parser(ts, sourceName);
-        final ProgramNode<?> p = parser.parse();
-        one.visit(p);
-        two.visit(p);
+        processImpl(new Source(jsds), sourceName);
     }
 
     @Override
     public void process(Reader jsds, String sourceName){
-        final Source source = new Source(jsds);
+        processImpl(new Source(jsds), sourceName);
+    }
+
+    protected void processImpl(Source source, String sourceName){
         final TokenStream ts = new TokenStream(source);
         final Parser parser = new Parser(ts, sourceName);
         final ProgramNode<?> p = parser.parse();
+        PassOne one = new PassOne();
+        PassTwo two = new PassTwo();
         one.visit(p);
         two.visit(p);
     }

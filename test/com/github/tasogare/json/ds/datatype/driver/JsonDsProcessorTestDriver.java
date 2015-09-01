@@ -55,10 +55,15 @@ import com.github.tasogare.json.ds.parser.TokenStream;
  */
 public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSchemaProcessorTestDriver {
 
-    private Variant complianceVariant;
+    protected Variant complianceVariant;
     private final JsonMetaObjectTestDriver metaObjects;
+
+    public JsonDsProcessorTestDriver(JsonMetaObjectTestDriver metaObjects) {
+        this.metaObjects = metaObjects;
+    }
+
     public JsonDsProcessorTestDriver() {
-        metaObjects = new JsonMetaObjectTestDriver();
+        this(new JsonMetaObjectTestDriver());
     }
 
     @Override
@@ -113,6 +118,7 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
 
     @Override
     public Type visit(PragmaNode node) {
+        //FIXME: use pragma決め打ち
         for(final IdentifierNode iden : node.getPragmaItems()){
             if(iden instanceof ContextuallyReservedIdentifierNode){
                 if (((ContextuallyReservedIdentifierNode) iden).isStandard()) {

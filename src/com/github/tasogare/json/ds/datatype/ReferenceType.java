@@ -18,6 +18,18 @@ public class ReferenceType implements Type {
         return getValue().isTypeOf(t);
     }
 
+    /**
+     * 実験的
+     * @return 参照仕様型の解決すべき名前を返します
+     */
+    public final String getName() {
+        return name;
+    }
+
+    /**
+     * XXX: 名前をもっとわかりやすく
+     * @return
+     */
     public final Type getValue(){
         return metaObjects.getMetaObject(name);
     }
