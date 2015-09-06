@@ -11,7 +11,6 @@ import java.util.List;
 public class ArrayType implements StructuralType {
 
     //XXX fixedElementsとvariableElementsを持っていないときの値が何になるかは今のところ実装依存
-    //TODO fixedElementsやvariableElementsを持っているかどうかを調べるメソッドが必要か？
     final List<Type> fixedElements;
     final Type variableElements;
 
@@ -120,8 +119,15 @@ public class ArrayType implements StructuralType {
         return fixedElements;
     }
 
+    public boolean hasFixedElements() {
+        return fixedElements.isEmpty();
+    }
+
     public Type getVariableElements() {
         return variableElements;
     }
 
+    public boolean hasVariableElements() {
+        return variableElements != null;
+    }
 }

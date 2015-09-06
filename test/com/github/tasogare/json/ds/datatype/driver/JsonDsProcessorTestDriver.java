@@ -10,7 +10,13 @@ import static com.github.tasogare.json.ds.datatype.Intrinsics.nonNullableAnyType
 import static com.github.tasogare.json.ds.datatype.Intrinsics.nullType;
 import static com.github.tasogare.json.ds.datatype.Intrinsics.undefindType;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -43,6 +49,7 @@ import com.github.tasogare.json.ds.internal.ast.synthetic.DirectiveNode;
 import com.github.tasogare.json.ds.internal.ast.synthetic.FieldNameNode;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 import com.github.tasogare.json.ds.parser.Parser;
+import com.github.tasogare.json.ds.parser.ParserException;
 import com.github.tasogare.json.ds.parser.Source;
 import com.github.tasogare.json.ds.parser.TokenStream;
 
@@ -55,7 +62,8 @@ import com.github.tasogare.json.ds.parser.TokenStream;
  */
 public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSchemaProcessorTestDriver {
 
-    protected Variant complianceVariant;
+    protected Mode complianceMode;
+    protected URL sourceName;
     private final JsonMetaObjectTestDriver metaObjects;
 
     public JsonDsProcessorTestDriver(JsonMetaObjectTestDriver metaObjects) {
@@ -118,16 +126,43 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
 
     @Override
     public Type visit(PragmaNode node) {
-        //FIXME: use pragma決め打ち
-        for(final IdentifierNode iden : node.getPragmaItems()){
-            if(iden instanceof ContextuallyReservedIdentifierNode){
-                if (((ContextuallyReservedIdentifierNode) iden).isStandard()) {
-                    complianceVariant = Variant.Standard;
-                    return null;
+        switch (node.getName()) {
+        case "use":
+            for (final IdentifierNode iden : node.<IdentifierNode> getPragmaItems()) {
+                if (iden instanceof ContextuallyReservedIdentifierNode) {
+                    if (((ContextuallyReservedIdentifierNode) iden).isStandard()) {
+                        complianceMode = Mode.Standard;
+                        return null;
+                    }
                 }
             }
+            throw new JsonDsException("standard variantのみ利用できます", StandardErrors.SyntaxError);
+        case "include":
+            System.err.println("warning: include pragma TBD");
+            if (sourceName != null) {
+                final URI baseUri;
+                try {
+                    baseUri = new URI(sourceName.toString());
+                } catch (URISyntaxException e) {
+                    throw new JsonDsException(sourceName.toString(), e, StandardErrors.URIError);
+                }
+                // XXX: とりあえず一つのインクルード・パスを受け取る
+                final URI includeUri = baseUri.resolve(node.<StringLiteralNode> getPragmaItems().get(0).getString());
+                final JsonDsProcessorTestDriver nested = new JsonDsProcessorTestDriver(getMetaObjects());
+                try (final InputStreamReader r = new InputStreamReader(includeUri.toURL().openStream())) {
+                    nested.process(r, includeUri.toURL());
+                } catch (MalformedURLException e) {
+                    throw new JsonDsException(includeUri.toString(), e, StandardErrors.URIError);
+                } catch (IOException | IllegalArgumentException e) {
+                    throw new JsonDsException(includeUri.toString(), e, StandardErrors.InternalError);
+                }
+                return null;
+            } else {
+                throw new JsonDsException("base URI is null", StandardErrors.URIError);
+            }
+        default:
+            throw new AssertionError();
         }
-        throw new JsonDsException("standard variantのみ利用できます", StandardErrors.SyntaxError);
     }
 
     @Override
@@ -213,19 +248,21 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
     }
 
     @Override
-    public void process(String jsds, String sourceName) {
+    public void process(String jsds, URL sourceName) {
         final Source source = new Source(jsds);
-        final TokenStream ts = new TokenStream(source);
-        final Parser parser = new Parser(ts, sourceName);
-        final ProgramNode<?> p = parser.parse();
-        visit(p);
+        processImpl(source, sourceName);
     }
 
     @Override
-    public void process(Reader jsds, String sourceName) {
+    public void process(Reader jsds, URL sourceName) {
         final Source source = new Source(jsds);
+        processImpl(source, sourceName);
+    }
+
+    protected void processImpl(final Source source, URL sourceName) throws ParserException {
+        this.sourceName = sourceName;
         final TokenStream ts = new TokenStream(source);
-        final Parser parser = new Parser(ts, sourceName);
+        final Parser parser = new Parser(ts, sourceName != null ? sourceName.toString() : "");
         final ProgramNode<?> p = parser.parse();
         visit(p);
     }
@@ -234,8 +271,8 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
      * 
      * @return JSON-DSファイルが準拠しているJSON-DS Variantを返す
      */
-    public final Variant getComplianceVariant() {
-        return complianceVariant;
+    public final Mode getComplianceMode() {
+        return complianceMode;
     }
 
     public final JsonMetaObjectTestDriver getMetaObjects() {

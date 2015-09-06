@@ -1,0 +1,4 @@
+use standard;
+include "./includes/LayerTypeHoisted.jsds";
+
+type JSON = Layer;

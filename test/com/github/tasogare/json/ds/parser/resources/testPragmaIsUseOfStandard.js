@@ -1,3 +1,4 @@
-use standard;
+use
+	standard;
 
 type S = string;

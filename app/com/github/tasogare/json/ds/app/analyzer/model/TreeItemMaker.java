@@ -102,17 +102,28 @@ public class TreeItemMaker implements NodeVisitor<TreeItem<String>> {
 
     @Override
     public TreeItem<String> visit(PragmaNode node) {
-        for(final IdentifierNode iden : node.getPragmaItems()){
-            if(iden instanceof ContextuallyReservedIdentifierNode){
-                if (((ContextuallyReservedIdentifierNode) iden).isStandard()) {
-                    //FIXME: use pragma決め打ち
-                    TreeItem<String> use = new TreeItem<>("use", new ImageView(pragmaImage));
-                    use.getChildren().add(iden.accept(this));
-                    return use;
+        switch (node.getName()) {
+        case "use":
+            for (final IdentifierNode iden : node.<IdentifierNode> getPragmaItems()) {
+                if (iden instanceof ContextuallyReservedIdentifierNode) {
+                    if (((ContextuallyReservedIdentifierNode) iden).isStandard()) {
+                        TreeItem<String> use = new TreeItem<>("use", new ImageView(pragmaImage));
+                        use.getChildren().add(iden.accept(this));
+                        return use;
+                    }
                 }
             }
+            throw new JsonDsException("standard variantのみ利用できます", StandardErrors.SyntaxError);
+        case "include":
+            //XXX: 今のところincludeされるパスを表示するだけ
+            TreeItem<String> include = new TreeItem<>("include", new ImageView(pragmaImage));
+            for (final StringLiteralNode strLit : node.<StringLiteralNode> getPragmaItems()) {
+                include.getChildren().add(strLit.accept(this));
+            }
+            return include;
+        default:
+            throw new AssertionError();
         }
-        throw new JsonDsException("standard variantのみ利用できます", StandardErrors.SyntaxError);
     }
 
     @Override

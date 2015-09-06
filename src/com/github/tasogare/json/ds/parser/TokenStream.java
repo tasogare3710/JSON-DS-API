@@ -177,6 +177,37 @@ public class TokenStream {
             } else {
                 break;
             }
+        case 'i':
+            if(source.matchWithAdvance('n')){
+                if(source.matchWithAdvance('c')){
+                    if(source.matchWithAdvance('l')){
+                        if(source.matchWithAdvance('u')){
+                            if(source.matchWithAdvance('d')){
+                                if(source.matchWithAdvance('e')){
+                                    return currentToken(Token.IncludePragma);
+                                }else{
+                                    source.pushback(5);
+                                    break;
+                                }
+                            }else{
+                                source.pushback(4);
+                                break;
+                            }
+                        }else{
+                            source.pushback(3);
+                            break;
+                        }
+                    }else{
+                        source.pushback(2);
+                        break;
+                    }
+                }else{
+                    source.pushback(1);
+                    break;
+                }
+            }else {
+                break;
+            }
         case 'n':
             if (source.matchWithAdvance('u')) {
                 if (source.matchWithAdvance('l')) {

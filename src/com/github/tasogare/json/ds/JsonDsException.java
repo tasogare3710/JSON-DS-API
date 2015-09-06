@@ -22,7 +22,15 @@ public class JsonDsException extends RuntimeException {
         /**
          * 解決できない参照のエラー
          */
-        ReferenceError;
+        ReferenceError,
+        /**
+         * 解決できないURIのエラー
+         */
+        URIError,
+        /**
+         * 内部エラー
+         */
+        InternalError;
     }
 
     private static final long serialVersionUID = 5778929708992048465L;

@@ -38,7 +38,7 @@ import com.github.tasogare.json.ds.parser.TokenStream;
 public final class PrintNodeVisitor implements NodeVisitor<String> {
 
     public static void main(String... args){
-        final String name = "com/github/tasogare/json/ds/parser/resources/test.js";
+        final String name = "com/github/tasogare/json/ds/datatype/resources/layer/include/layerSplit.jsds";
         InputStream is = PrintNodeVisitor.class.getClassLoader().getResourceAsStream(name);
         ProgramNode<?> p = null;
         try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
@@ -122,7 +122,10 @@ public final class PrintNodeVisitor implements NodeVisitor<String> {
     @Override
     public <D extends AstNode & DirectiveNode<D>> String visit(ProgramNode<D> node) {
         StringBuilder sb = new StringBuilder();
-        for(D directive : node.getDirectives()){
+        for(final PragmaNode pragma : node.getPragmas()){
+            sb.append(pragma.accept(this)).append("\n");
+        }
+        for(final D directive : node.getDirectives()){
             sb.append(directive.accept(this)).append("\n");
         }
         return sb.toString();
@@ -180,9 +183,20 @@ public final class PrintNodeVisitor implements NodeVisitor<String> {
 
     @Override
     public String visit(PragmaNode node) {
-        StringBuilder sb = new StringBuilder("USE (");
-        for(IdentifierNode item : node.getPragmaItems()){
-            sb.append(item.accept(this)).append(", ");
+        assert "use".equals(node.getName()) || "include".equals(node.getName());
+
+        StringBuilder sb = new StringBuilder();
+        final String name = node.getName();
+        if("use".equals(name)){
+            sb.append("USE(");
+            for(IdentifierNode item : node.<IdentifierNode>getPragmaItems()){
+                sb.append(item.accept(this)).append(", ");
+            }
+        }else if("include".equals(name)){
+            sb.append("INCLUDE(");
+            for(StringLiteralNode item : node.<StringLiteralNode>getPragmaItems()){
+                sb.append(item.accept(this)).append(", ");
+            }            
         }
         sb.delete(sb.length() - ", ".length(), sb.length());
         sb.append(")");

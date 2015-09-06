@@ -10,7 +10,13 @@ import static com.github.tasogare.json.ds.datatype.Intrinsics.nonNullableAnyType
 import static com.github.tasogare.json.ds.datatype.Intrinsics.nullType;
 import static com.github.tasogare.json.ds.datatype.Intrinsics.undefindType;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -98,16 +104,43 @@ public class JsonDsProcessorHoistableTestDriver implements DatatypeSchemaProcess
 
         @Override
         public Type visit(PragmaNode node) {
-            //FIXME: use pragma決め打ち
-            for (final IdentifierNode iden : node.getPragmaItems()) {
-                if (iden instanceof ContextuallyReservedIdentifierNode) {
-                    if (((ContextuallyReservedIdentifierNode) iden).isStandard()) {
-                        complianceVariant = Variant.Standard;
-                        return null;
+            switch (node.getName()) {
+            case "use":
+                for (final IdentifierNode iden : node.<IdentifierNode> getPragmaItems()) {
+                    if (iden instanceof ContextuallyReservedIdentifierNode) {
+                        if (((ContextuallyReservedIdentifierNode) iden).isStandard()) {
+                            complianceMode = Mode.Standard;
+                            return null;
+                        }
                     }
                 }
+                throw new JsonDsException("standard variantのみ利用できます", StandardErrors.SyntaxError);
+            case "include":
+                System.err.println("warning: include pragma TBD");
+                if (JsonDsProcessorHoistableTestDriver.this.sourceName != null) {
+                    final URI baseUri;
+                    try {
+                        baseUri = new URI(JsonDsProcessorHoistableTestDriver.this.sourceName.toString());
+                    } catch (URISyntaxException e) {
+                        throw new JsonDsException(JsonDsProcessorHoistableTestDriver.this.sourceName.toString(), e, StandardErrors.URIError);
+                    }
+                    // XXX: とりあえず一つのインクルード・パスを受け取る
+                    final URI includeUri = baseUri.resolve(node.<StringLiteralNode> getPragmaItems().get(0).getString());
+                    final JsonDsProcessorHoistableTestDriver nested = new JsonDsProcessorHoistableTestDriver(JsonDsProcessorHoistableTestDriver.this.getMetaObjects());
+                    try (final InputStreamReader r = new InputStreamReader(includeUri.toURL().openStream())) {
+                        nested.process(r, includeUri.toURL());
+                    } catch (MalformedURLException e) {
+                        throw new JsonDsException(includeUri.toString(), e, StandardErrors.URIError);
+                    } catch (IOException | IllegalArgumentException e) {
+                        throw new JsonDsException(includeUri.toString(), e, StandardErrors.InternalError);
+                    }
+                    return null;
+                } else {
+                    throw new JsonDsException("base URI is null", StandardErrors.URIError);
+                }
+            default:
+                throw new AssertionError();
             }
-            throw new JsonDsException("standard variantのみ利用できます", StandardErrors.SyntaxError);
         }
 
         @Override
@@ -291,7 +324,8 @@ public class JsonDsProcessorHoistableTestDriver implements DatatypeSchemaProcess
         }
     }
 
-    protected Variant complianceVariant;
+    protected Mode complianceMode;
+    protected URL sourceName;
     private final JsonMetaObjectTestDriver metaObjects;
 
     public JsonDsProcessorHoistableTestDriver(JsonMetaObjectTestDriver metaObjects) {
@@ -303,18 +337,19 @@ public class JsonDsProcessorHoistableTestDriver implements DatatypeSchemaProcess
     }
 
     @Override
-    public void process(String jsds, String sourceName){
+    public void process(String jsds, URL sourceName){
         processImpl(new Source(jsds), sourceName);
     }
 
     @Override
-    public void process(Reader jsds, String sourceName){
+    public void process(Reader jsds, URL sourceName){
         processImpl(new Source(jsds), sourceName);
     }
 
-    protected void processImpl(Source source, String sourceName){
+    protected void processImpl(Source source, URL sourceName){
+        this.sourceName = sourceName;
         final TokenStream ts = new TokenStream(source);
-        final Parser parser = new Parser(ts, sourceName);
+        final Parser parser = new Parser(ts, sourceName != null ? sourceName.toString() : "");
         final ProgramNode<?> p = parser.parse();
         PassOne one = new PassOne();
         PassTwo two = new PassTwo();
@@ -322,8 +357,8 @@ public class JsonDsProcessorHoistableTestDriver implements DatatypeSchemaProcess
         two.visit(p);
     }
 
-    public final Variant getComplianceVariant() {
-        return complianceVariant;
+    public final Mode getComplianceMode() {
+        return complianceMode;
     }
 
     public final JsonMetaObjectTestDriver getMetaObjects() {

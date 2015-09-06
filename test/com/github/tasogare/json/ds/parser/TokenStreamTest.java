@@ -411,6 +411,16 @@ public class TokenStreamTest {
     }
 
     @Test
+    public void testIncludePragma() {
+        final TokenStream ts = new TokenStream(new Source("include \"./part2.jsds\";"));
+        assertThat(ts.scanToken(), is(Token.IncludePragma));
+        assertThat(ts.scanToken(), is(Token.StringLiteral));
+        assertThat(ts.asStringLiteral(), equalTo("./part2.jsds"));
+        assertThat(ts.scanToken(), is(Token.SemiColon));
+        assertThat(ts.scanToken(), is(Token.Eof));
+    }
+
+    @Test
     public void testNullable() {
         final TokenStream ts = new TokenStream(new Source("type N = number?;"));
         assertThat(ts.scanToken(), is(Token.TypeOperator));

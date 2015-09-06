@@ -21,7 +21,9 @@ import org.junit.Test;
 
 import com.github.tasogare.json.ds.internal.ast.ContextuallyReservedIdentifierNode;
 import com.github.tasogare.json.ds.internal.ast.IdentifierNode;
+import com.github.tasogare.json.ds.internal.ast.PragmaNode;
 import com.github.tasogare.json.ds.internal.ast.ProgramNode;
+import com.github.tasogare.json.ds.internal.ast.StringLiteralNode;
 import com.github.tasogare.json.ds.parser.Parser;
 import com.github.tasogare.json.ds.parser.ParserException;
 import com.github.tasogare.json.ds.parser.Source;
@@ -65,6 +67,25 @@ public class ParserTest {
     }
 
     @Test
+    public void testPragma2() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testPragma2.jsds";
+        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+        ProgramNode<?> p = null;
+        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        } catch(ParserException e){
+            System.err.println(e.getSourceName());
+            System.err.println(e.getStartPosition());
+            System.err.println(e.getEndPosition());
+            e.printStackTrace();
+            fail();
+        }
+        System.out.println(p);
+    }
+
+    @Test
     public void testPragmaIsUseOfStrict() throws IOException {
         final String name = "com/github/tasogare/json/ds/parser/resources/testPragmaIsUseOfStrict.js";
         InputStream is = getClass().getClassLoader().getResourceAsStream(name);
@@ -80,7 +101,7 @@ public class ParserTest {
             e.printStackTrace();
             fail();
         }
-        final IdentifierNode in = p.getPragmas().get(0).getPragmaItems().get(0);
+        final IdentifierNode in = p.getPragmas().get(0).<IdentifierNode>getPragmaItems().get(0);
         assertThat(in, instanceOf(ContextuallyReservedIdentifierNode.class));
         assertTrue(((ContextuallyReservedIdentifierNode)in).isStrict());
     }
@@ -101,14 +122,62 @@ public class ParserTest {
             e.printStackTrace();
             fail();
         }
-        final IdentifierNode in = p.getPragmas().get(0).getPragmaItems().get(0);
+        final IdentifierNode in = p.getPragmas().get(0).<IdentifierNode>getPragmaItems().get(0);
         assertThat(in, instanceOf(ContextuallyReservedIdentifierNode.class));
         assertTrue(((ContextuallyReservedIdentifierNode)in).isStandard());
     }
 
     @Test(expected=ParserException.class)
-    public void testBadPragma() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testBadPragma.js";
+    public void testBadUsePragma() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testBadUsePragma.js";
+        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+        ProgramNode<?> p = null;
+        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        }
+        System.out.println(p);
+    }
+
+    @Test
+    public void testPragmaIsInclude() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testPragmaIsInclude.jsds";
+        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+        ProgramNode<?> p = null;
+        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        } catch(ParserException e){
+            System.err.println(e.getSourceName());
+            System.err.println(e.getStartPosition());
+            System.err.println(e.getEndPosition());
+            e.printStackTrace();
+            fail();
+        }
+        final PragmaNode includePragma = p.getPragmas().get(1);
+        assertThat(includePragma.getName(), equalTo("include"));
+        final StringLiteralNode strLite = includePragma.<StringLiteralNode>getPragmaItems().get(0);
+        assertThat(strLite.getString(), equalTo("./Comments.js"));
+    }
+
+    @Test(expected=ParserException.class)
+    public void testBadIncludePragma() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testBadIncludePragma.jsds";
+        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+        ProgramNode<?> p = null;
+        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        }
+        System.out.println(p);
+    }
+
+    @Test
+    public void testEmptyPragma() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testEmptyPragma.jsds";
         InputStream is = getClass().getClassLoader().getResourceAsStream(name);
         ProgramNode<?> p = null;
         try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){

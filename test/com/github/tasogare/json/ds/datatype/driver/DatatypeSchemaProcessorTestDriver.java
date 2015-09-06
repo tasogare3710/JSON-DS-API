@@ -5,6 +5,7 @@
 package com.github.tasogare.json.ds.datatype.driver;
 
 import java.io.Reader;
+import java.net.URL;
 
 /**
  * JSON-DS API仕様にはプロセッサが含まれないためテスト・ドライバが必要
@@ -13,7 +14,7 @@ import java.io.Reader;
  */
 public interface DatatypeSchemaProcessorTestDriver {
 
-    public static enum Variant {
+    public static enum Mode {
         Extend,
         Standard,
         Strict;
@@ -24,13 +25,13 @@ public interface DatatypeSchemaProcessorTestDriver {
      * @param jsds
      * @param sourceName
      */
-    void process(Reader jsds, String sourceName);
+    void process(Reader jsds, URL sourceName);
 
     /**
      * TODO throws宣言必要
      * @param jsds
      * @param sourceName
      */
-    void process(String jsds, String sourceName);
+    void process(String jsds, URL sourceName);
 
 }

@@ -38,7 +38,7 @@ public class JsonValidateService extends Service<Boolean> {
             protected Boolean call() throws Exception {
                 final JsonDsProcessorHoistableTestDriver processor = new JsonDsProcessorHoistableTestDriver();
                 try (BufferedReader r = new BufferedReader(new FileReader(getSchema()))) {
-                    processor.process(r, getSchema().toURI().toString());
+                    processor.process(r, getSchema().toURI().toURL());
                 }
                 final JsonStructure structure;
                 try (BufferedReader r = new BufferedReader(new FileReader(getJson()))) {

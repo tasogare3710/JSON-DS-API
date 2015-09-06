@@ -1,0 +1,5 @@
+use standard;
+include
+	"./Comments.js";
+
+type T = string;

@@ -27,7 +27,7 @@ public class ReferenceType implements Type {
     }
 
     /**
-     * XXX: 名前をもっとわかりやすく
+     * 
      * @return
      */
     public final Type getValue(){

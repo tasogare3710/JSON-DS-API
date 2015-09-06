@@ -30,13 +30,26 @@ public enum Token {
     SemiColon(";"),
     TripleDot("..."),
     TypeOperator("type"){
-        @Override public Token toEscaped() {
+        @Override Token toEscaped() {
             return Token.EscapedTypeOperator;
         }
     },
     UsePragma("use"){
-        @Override public Token toEscaped() {
+        @Override Token toEscaped() {
             return Token.EscapedUsePragma;
+        }
+
+        @Override public boolean isPragma(){
+            return true;
+        }
+    },
+    IncludePragma("include"){
+        @Override Token toEscaped() {
+            return Token.EscapedIncludePragma;
+        }
+
+        @Override public boolean isPragma(){
+            return true;
         }
     },
     Identifier("<identifier>"){
@@ -48,7 +61,16 @@ public enum Token {
     EscapedNull("<escaped-null>"),
     EscapedIdentifier("<escaped-identifier>"),
     EscapedTypeOperator("<escaped-type>"),
-    EscapedUsePragma("<escaped-use>"),
+    EscapedUsePragma("<escaped-use>"){
+        @Override public boolean isPragma(){
+            return true;
+        }
+    },
+    EscapedIncludePragma("<escaped-include>"){
+        @Override public boolean isPragma(){
+            return true;
+        }
+    },
     Comment("<comment>"),
     LineTerminator("<line-terminator>"),
     Eof("<eof>");
@@ -67,8 +89,16 @@ public enum Token {
         return getName();
     }
 
-    public Token toEscaped() {
+    Token toEscaped() {
         throw new AssertionError();
+    }
+
+    /**
+     * 実験的
+     * @return トークンがプラグマなら{@code true}
+     */
+    public boolean isPragma(){
+        return false;
     }
 
     /**

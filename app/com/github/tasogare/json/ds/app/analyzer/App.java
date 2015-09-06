@@ -18,6 +18,21 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+/**
+ * XXX: 開発中は以下の引数を渡して実行しているが何か操作をするとどれかが悪さをしてハングアップするがどれか特定していない
+ * <pre>
+ * -Djavafx.verbose=true
+ * -Djavafx.debug=false
+ * -Djavafx.pulseLogger=true
+ * -Dquantum.verbose=true
+ * -Dquantum.debug=true
+ * -Dquantum.pulse=true
+ * -Dcom.sun.scenario.animation.adaptivepulse=true
+ * -Dcom.sun.javafx.highContrastTheme=BLACKONWHITE
+ * </pre>
+ * @author tasogare
+ *
+ */
 public class App extends Application {
 
     private final ResourceBundle RESOURCES;

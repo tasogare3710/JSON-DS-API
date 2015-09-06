@@ -37,14 +37,28 @@ public class PragmaNodeTest {
     }
 
     @Test
-    public void test() {
+    public void testUsePragma() {
         //use strict;
         final ArrayList<IdentifierNode> pragmaItems = new ArrayList<>();
         pragmaItems.add(new IdentifierNode(4, 10, "strict"));
-        final PragmaNode pragma = new PragmaNode(0, 10, pragmaItems);
+        final PragmaNode pragma = new PragmaNode(0, 10, "use", pragmaItems);
+        assertThat(pragma.getName(), equalTo("use"));
 
-        for(final IdentifierNode idn : pragma.getPragmaItems()){
+        for(final IdentifierNode idn : pragma.<IdentifierNode>getPragmaItems()){
             assertThat(idn.getString(), equalTo("strict"));
+        }
+    }
+
+    @Test
+    public void testIncludePragma() {
+        //include "./part2.jsds";
+        final ArrayList<StringLiteralNode> pragmaItems = new ArrayList<>();
+        pragmaItems.add(new StringLiteralNode(8, 22, "./part2.jsds"));
+        final PragmaNode pragma = new PragmaNode(0, 22, "include", pragmaItems);
+        assertThat(pragma.getName(), equalTo("include"));
+
+        for(final StringLiteralNode strLite : pragma.<StringLiteralNode>getPragmaItems()){
+            assertThat(strLite.getString(), equalTo("./part2.jsds"));
         }
     }
 
