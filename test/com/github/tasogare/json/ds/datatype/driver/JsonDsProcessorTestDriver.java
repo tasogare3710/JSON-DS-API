@@ -248,18 +248,18 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
     }
 
     @Override
-    public void process(String jsds, URL sourceName) {
+    public void process(String jsds, URL sourceName) throws ParserException, JsonDsException {
         final Source source = new Source(jsds);
         processImpl(source, sourceName);
     }
 
     @Override
-    public void process(Reader jsds, URL sourceName) {
+    public void process(Reader jsds, URL sourceName) throws ParserException, JsonDsException {
         final Source source = new Source(jsds);
         processImpl(source, sourceName);
     }
 
-    protected void processImpl(final Source source, URL sourceName) throws ParserException {
+    protected void processImpl(final Source source, URL sourceName) throws ParserException, JsonDsException {
         this.sourceName = sourceName;
         final TokenStream ts = new TokenStream(source);
         final Parser parser = new Parser(ts, sourceName != null ? sourceName.toString() : "");

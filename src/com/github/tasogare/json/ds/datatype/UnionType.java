@@ -36,8 +36,19 @@ public class UnionType implements StructuralType {
             if (this.members.isEmpty() && other.members.isEmpty()) {
                 return true;
             }else if(this.members.size() == other.members.size()){
-                //FIXME 各要素ごとにisTypeOfを使ったほうがいい
-                return this.members.containsAll(other.members);
+                if(this == other){
+                    return true;
+                }
+                for(final Type m : this.members){
+                    final HashSet<Boolean> detected = new HashSet<>();
+                    for(final Type om : other.members){
+                        detected.add(m.isTypeOf(om));
+                    }
+                    if(!detected.contains(Boolean.TRUE)){
+                        return false;
+                    }
+                }
+                return true;
             }else if(this.members.isEmpty()){
                 assert !other.members.isEmpty();
                 return false;

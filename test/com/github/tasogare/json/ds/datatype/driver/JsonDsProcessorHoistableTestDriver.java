@@ -51,6 +51,7 @@ import com.github.tasogare.json.ds.internal.ast.synthetic.DirectiveNode;
 import com.github.tasogare.json.ds.internal.ast.synthetic.FieldNameNode;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 import com.github.tasogare.json.ds.parser.Parser;
+import com.github.tasogare.json.ds.parser.ParserException;
 import com.github.tasogare.json.ds.parser.Source;
 import com.github.tasogare.json.ds.parser.TokenStream;
 
@@ -337,16 +338,16 @@ public class JsonDsProcessorHoistableTestDriver implements DatatypeSchemaProcess
     }
 
     @Override
-    public void process(String jsds, URL sourceName){
+    public void process(String jsds, URL sourceName) throws ParserException, JsonDsException {
         processImpl(new Source(jsds), sourceName);
     }
 
     @Override
-    public void process(Reader jsds, URL sourceName){
+    public void process(Reader jsds, URL sourceName) throws ParserException, JsonDsException {
         processImpl(new Source(jsds), sourceName);
     }
 
-    protected void processImpl(Source source, URL sourceName){
+    protected void processImpl(Source source, URL sourceName) throws ParserException, JsonDsException {
         this.sourceName = sourceName;
         final TokenStream ts = new TokenStream(source);
         final Parser parser = new Parser(ts, sourceName != null ? sourceName.toString() : "");

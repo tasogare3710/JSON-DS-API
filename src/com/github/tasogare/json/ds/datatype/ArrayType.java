@@ -10,10 +10,22 @@ import java.util.List;
 
 public class ArrayType implements StructuralType {
 
-    //XXX fixedElementsとvariableElementsを持っていないときの値が何になるかは今のところ実装依存
+    // 存在しない場合はCollections#emptyList()
     final List<Type> fixedElements;
+    // 存在しない場合はnull
     final Type variableElements;
 
+    /**
+     * {@code fixedElements}と{@code variableElements}はそれぞれ、
+     * fixed-lengt harray要素とvariable-length array要素を指定します。
+     * fixed-length array要素が存在しない場合は{@linkplain Collections#emptyList()}のように空のリストを、
+     * variable-length array要素が存在しない場合は{@code null}を、それぞれ引数としてこのコンストラクタへ渡します。
+     * 
+     * @param fixedElements
+     *            存在しない場合は空のリスト
+     * @param variableElements
+     *            存在しない場合は{@code null}
+     */
     public ArrayType(final List<Type> fixedElements, final Type variableElements) {
         this.fixedElements = Collections.unmodifiableList(new ArrayList<>(fixedElements));
         this.variableElements = variableElements;
@@ -24,11 +36,11 @@ public class ArrayType implements StructuralType {
     }
 
     public ArrayType(final Type variableElements){
-        this(Collections.emptyList(), variableElements);
+        this(Collections.<Type>emptyList(), variableElements);
     }
 
     public ArrayType() {
-        this(Collections.emptyList());
+        this(Collections.<Type>emptyList());
     }
 
     /**

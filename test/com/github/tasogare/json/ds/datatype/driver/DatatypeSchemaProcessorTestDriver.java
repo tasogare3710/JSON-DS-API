@@ -7,6 +7,9 @@ package com.github.tasogare.json.ds.datatype.driver;
 import java.io.Reader;
 import java.net.URL;
 
+import com.github.tasogare.json.ds.JsonDsException;
+import com.github.tasogare.json.ds.parser.ParserException;
+
 /**
  * JSON-DS API仕様にはプロセッサが含まれないためテスト・ドライバが必要
  * @author tasogare
@@ -21,17 +24,25 @@ public interface DatatypeSchemaProcessorTestDriver {
     }
 
     /**
-     * TODO throws宣言必要
+     * 
      * @param jsds
      * @param sourceName
+     * @throws ParserException
+     *             XXX: {@linkplain ParserException}は{@linkplain JsonDsException}
+     *             の原因としてラップされて扱われるように変更されるかもしれない
+     * @throws JsonDsException
      */
-    void process(Reader jsds, URL sourceName);
+    void process(Reader jsds, URL sourceName) throws ParserException, JsonDsException;
 
     /**
-     * TODO throws宣言必要
+     * 
      * @param jsds
      * @param sourceName
+     * @throws ParserException
+     *             XXX: {@linkplain ParserException}は{@linkplain JsonDsException}
+     *             の原因としてラップされて扱われるように変更されるかもしれない
+     * @throws JsonDsException
      */
-    void process(String jsds, URL sourceName);
+    void process(String jsds, URL sourceName) throws ParserException, JsonDsException;
 
 }
