@@ -14,6 +14,7 @@ import com.github.tasogare.json.ds.parser.Parser;
 import com.github.tasogare.json.ds.parser.Source;
 import com.github.tasogare.json.ds.parser.TokenStream;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -47,7 +48,7 @@ public class JsonDsLoadService extends Service<TreeItem<String>> {
         };
     }
 
-    public final SimpleObjectProperty<File> schemaProperty() {
+    public final ObjectProperty<File> schemaProperty() {
         return schema;
     }
 

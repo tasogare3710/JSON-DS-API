@@ -175,6 +175,19 @@ public class ParserTest {
         System.out.println(p);
     }
 
+    @Test(expected = ParserException.class)
+    public void testBadIncludePragmaInMultiItem() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testBadIncludePragmaInMultiItem.jsds";
+        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+        ProgramNode<?> p = null;
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        }
+        System.out.println(p);
+    }
+
     @Test
     public void testEmptyPragma() throws IOException {
         final String name = "com/github/tasogare/json/ds/parser/resources/testEmptyPragma.jsds";

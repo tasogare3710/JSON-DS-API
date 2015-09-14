@@ -1,0 +1,3 @@
+use standard;
+include "./Comments.js",
+		"./Comments.js";

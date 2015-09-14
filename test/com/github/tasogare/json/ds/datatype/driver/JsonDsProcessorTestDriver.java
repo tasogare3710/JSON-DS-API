@@ -146,7 +146,7 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
                 } catch (URISyntaxException e) {
                     throw new JsonDsException(sourceName.toString(), e, StandardErrors.URIError);
                 }
-                // XXX: とりあえず一つのインクルード・パスを受け取る
+                // include pragmaのitemは一つのみ許されるのでPragmaNode#getPragmaItems()は一つの要素を持ったListになる
                 final URI includeUri = baseUri.resolve(node.<StringLiteralNode> getPragmaItems().get(0).getString());
                 final JsonDsProcessorTestDriver nested = new JsonDsProcessorTestDriver(getMetaObjects());
                 try (final InputStreamReader r = new InputStreamReader(includeUri.toURL().openStream())) {

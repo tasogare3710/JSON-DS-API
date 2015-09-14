@@ -117,9 +117,8 @@ public class TreeItemMaker implements NodeVisitor<TreeItem<String>> {
         case "include":
             //XXX: 今のところincludeされるパスを表示するだけ
             TreeItem<String> include = new TreeItem<>("include", new ImageView(pragmaImage));
-            for (final StringLiteralNode strLit : node.<StringLiteralNode> getPragmaItems()) {
-                include.getChildren().add(strLit.accept(this));
-            }
+            final StringLiteralNode strLit = node.<StringLiteralNode> getPragmaItems().get(0);
+            include.getChildren().add(strLit.accept(this));
             return include;
         default:
             throw new AssertionError();

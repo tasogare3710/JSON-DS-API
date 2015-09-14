@@ -5,6 +5,7 @@
 package com.github.tasogare.json.ds.internal.ast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +14,7 @@ import com.github.tasogare.json.ds.internal.ast.synthetic.NameValue;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 
 /**
- * 
+ * XXX: use pragmaとinclude pragmaで分けたほうがいいかもしれない
  * @author tasogare
  *
  */
@@ -35,6 +36,21 @@ public class PragmaNode extends AstNode implements Cloneable {
         super(startPosition, endPosition);
         this.name = Objects.requireNonNull(name, "name is null");
         this.pragmaItems = pragmaItems == null ? null : Collections.unmodifiableList(new ArrayList<>(pragmaItems));
+    }
+
+    /**
+     * 
+     * @param startPosition
+     * @param endPosition
+     * @param name
+     * @param pragmaItem
+     */
+    public <ITEM extends AstNode & NameValue> PragmaNode(final long startPosition, final long endPosition, final String name,
+        final ITEM pragmaItem)
+    {
+        super(startPosition, endPosition);
+        this.name = Objects.requireNonNull(name, "name is null");
+        this.pragmaItems = pragmaItem == null ? null : Collections.unmodifiableList(Arrays.asList(pragmaItem));
     }
 
     @Override

@@ -125,7 +125,7 @@ public class JsonDsProcessorHoistableTestDriver implements DatatypeSchemaProcess
                     } catch (URISyntaxException e) {
                         throw new JsonDsException(JsonDsProcessorHoistableTestDriver.this.sourceName.toString(), e, StandardErrors.URIError);
                     }
-                    // XXX: とりあえず一つのインクルード・パスを受け取る
+                    // include pragmaのitemは一つのみ許されるのでPragmaNode#getPragmaItems()は一つの要素を持ったListになる
                     final URI includeUri = baseUri.resolve(node.<StringLiteralNode> getPragmaItems().get(0).getString());
                     final JsonDsProcessorHoistableTestDriver nested = new JsonDsProcessorHoistableTestDriver(JsonDsProcessorHoistableTestDriver.this.getMetaObjects());
                     try (final InputStreamReader r = new InputStreamReader(includeUri.toURL().openStream())) {

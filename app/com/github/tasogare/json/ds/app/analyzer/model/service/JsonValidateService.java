@@ -23,8 +23,8 @@ import javafx.concurrent.Task;
 
 public class JsonValidateService extends Service<Boolean> {
 
-    private final ObjectProperty<File> schema;
-    private final ObjectProperty<File> json;
+    private final SimpleObjectProperty<File> schema;
+    private final SimpleObjectProperty<File> json;
 
     public JsonValidateService(File schema, File json) {
         this.schema = new SimpleObjectProperty<>(this, "schema", schema);

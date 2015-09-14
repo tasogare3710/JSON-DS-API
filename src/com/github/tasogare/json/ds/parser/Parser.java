@@ -175,19 +175,15 @@ public class Parser {
     protected PragmaNode parseIncludePragma() {
         //@formatter:off
         // IncludePragma
-        //      "include" IncludePragmaItems
+        //      "include"  IncludePragmaItem
         //@formatter:on
-        final List<StringLiteralNode> items = parseIncludePragmaItems();
-        final PragmaNode pragma = new<StringLiteralNode> PragmaNode(0, ts.postion(), "include", items);
+        final StringLiteralNode item = parseIncludePragmaItem();
+        final PragmaNode pragma = new<StringLiteralNode> PragmaNode(0, ts.postion(), "include", item);
         return pragma;
     }
 
-    protected List<StringLiteralNode> parseIncludePragmaItems() {
+    protected StringLiteralNode parseIncludePragmaItem() {
         //@formatter:off
-        // IncludePragmaItems
-        //      IncludePragmaItem
-        //      IncludePragmaItems "," IncludePragmaItem
-        //
         // IncludePragmaItem
         //      StringLiteral
         //@formatter:on
@@ -197,27 +193,16 @@ public class Parser {
         }
         ts.pushPendding(t);
 
-        final List<StringLiteralNode> items = new ArrayList<>();
-        // XXX: IncludePragmaItems := IncludePragmaItems "," IncludePragmaItem は廃止されるかもしれないので実装していない
-        while (true) {
-            t = ts.scanTokenWithoutOf(Comment);
-            if (t == Eof) {
-                throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
-            }
-            // PragmaItem
-            if (t != StringLiteral) {
-                throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
-            }
-            final String item = ts.asStringLiteral();
-            items.add(new StringLiteralNode(0, ts.postion(), item));
-
-            t = ts.scanTokenWithoutOf(Comment);
-            if (t == SemiColon || t == LineTerminator) {
-                ts.pushPendding(t);
-                break;
-            }
+        t = ts.scanTokenWithoutOf(Comment);
+        if (t == Eof) {
+            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
         }
-        return items;
+        // PragmaItem
+        if (t != StringLiteral) {
+            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+        }
+        final String str = ts.asStringLiteral();
+        return new StringLiteralNode(0, ts.postion(), str);
     }
 
     /**
