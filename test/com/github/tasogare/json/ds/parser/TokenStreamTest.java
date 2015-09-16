@@ -657,9 +657,10 @@ public class TokenStreamTest {
             final TokenStream ts = new TokenStream(new Source(r));
             assertThat(ts.scanToken(), is(Token.EscapedTypeOperator));
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -673,9 +674,10 @@ public class TokenStreamTest {
             final TokenStream ts = new TokenStream(new Source(r));
             assertThat(ts.scanToken(), is(Token.EscapedTypeOperator));
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }

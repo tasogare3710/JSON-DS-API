@@ -72,7 +72,7 @@ public class Parser {
     }
 
     public <D extends AstNode & DirectiveNode<D>> ProgramNode<D> parse() throws ParserException {
-        return this.<D> parseProgram();
+        return this. <D> parseProgram();
     }
 
     protected List<PragmaNode> parsePragmas() {
@@ -105,7 +105,8 @@ public class Parser {
         //@formatter:on
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (!t.equals(UsePragma, EscapedUsePragma, IncludePragma, EscapedIncludePragma)) {
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
 
         final PragmaNode pragma;
@@ -120,7 +121,8 @@ public class Parser {
 
         t = ts.scanTokenWithoutOf(Comment);
         if (t == Eof || t != SemiColon) {
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
 
         return pragma;
@@ -132,7 +134,7 @@ public class Parser {
         //      "use" UsePragmaItems
         //@formatter:on
         final List<IdentifierNode> items = parseUsePragmaItems();
-        final PragmaNode pragma = new<IdentifierNode> PragmaNode(0, ts.postion(), "use", items);
+        final PragmaNode pragma = new<IdentifierNode> PragmaNode(0, ts.position(), "use", items);
         return pragma;
     }
 
@@ -149,7 +151,8 @@ public class Parser {
         //@formatter:on
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t == SemiColon) {
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
         ts.pushPendding(t);
 
@@ -158,7 +161,8 @@ public class Parser {
         while (true) {
             t = ts.scanTokenWithoutOf(Comment);
             if (t == Eof) {
-                throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+                throw new ParserException(
+                    new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
             }
             // PragmaItem
             items.add(parseIdentifier());
@@ -178,7 +182,7 @@ public class Parser {
         //      "include"  IncludePragmaItem
         //@formatter:on
         final StringLiteralNode item = parseIncludePragmaItem();
-        final PragmaNode pragma = new<StringLiteralNode> PragmaNode(0, ts.postion(), "include", item);
+        final PragmaNode pragma = new<StringLiteralNode> PragmaNode(0, ts.position(), "include", item);
         return pragma;
     }
 
@@ -189,20 +193,23 @@ public class Parser {
         //@formatter:on
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t == SemiColon) {
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
         ts.pushPendding(t);
 
         t = ts.scanTokenWithoutOf(Comment);
         if (t == Eof) {
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
         // PragmaItem
         if (t != StringLiteral) {
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
         final String str = ts.asStringLiteral();
-        return new StringLiteralNode(0, ts.postion(), str);
+        return new StringLiteralNode(0, ts.position(), str);
     }
 
     /**
@@ -255,7 +262,8 @@ public class Parser {
             // 一度EOFを返したらそれ以降は何度でもEOFを返すのでpenddingは必要ない。
             return td;
         }
-        throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+        throw new ParserException(
+            new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
     }
 
     protected <T extends AstNode & BasicTypeExpressionNode<T>> TypeDefinitionNode<T> parseTypeDefinition() {
@@ -265,16 +273,18 @@ public class Parser {
         //@formatter:on
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (!(t == TypeOperator || t == EscapedTypeOperator)) {
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
 
         t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (!(t == Identifier || t == EscapedIdentifier)) {
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
         final IdentifierNode identifier = parseIdentifier();
         TypeExpressionNode<T> te = parseTypeInitialisation();
-        return new TypeDefinitionNode<T>(ts.postion(), ts.postion(), identifier, te);
+        return new TypeDefinitionNode<T>(ts.position(), ts.position(), identifier, te);
     }
 
     /**
@@ -288,9 +298,9 @@ public class Parser {
         final String s = (ts.getCurrentToken() == Identifier) ? ts.asIdentifier() : ts.asEscapedIdentifier();
         final IdentifierNode identifier;
         if (!("standard".equals(s) || "strict".equals(s))) {
-            identifier = new IdentifierNode(ts.postion(), ts.postion(), s);
+            identifier = new IdentifierNode(ts.position(), ts.position(), s);
         } else {
-            identifier = new ContextuallyReservedIdentifierNode(ts.postion(), ts.postion(), s);
+            identifier = new ContextuallyReservedIdentifierNode(ts.position(), ts.position(), s);
         }
         return identifier;
     }
@@ -302,7 +312,8 @@ public class Parser {
         //@formatter:on
         final Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t != Assign) {
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
         return parseTypeExpression();
     }
@@ -326,7 +337,7 @@ public class Parser {
             nullability = TypeExpressionNode.Nullability.Absent;
             ts.pushPendding(t);
         }
-        return new TypeExpressionNode<T>(ts.postion(), ts.postion(), type, nullability);
+        return new TypeExpressionNode<T>(ts.position(), ts.position(), type, nullability);
     }
 
     @SuppressWarnings("unchecked")
@@ -343,9 +354,9 @@ public class Parser {
         final Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         switch (t) {
         case Any:
-            return (T) new AnyTypeNode(ts.postion(), ts.postion());
+            return (T) new AnyTypeNode(ts.position(), ts.position());
         case Null:
-            return (T) new NullLiteralNode(ts.postion(), ts.postion());
+            return (T) new NullLiteralNode(ts.position(), ts.position());
         case Identifier:
         case EscapedIdentifier:
             return (T) parseTypeName();
@@ -356,7 +367,8 @@ public class Parser {
         case LBracket:
             return (T) parseArrayType();
         default:
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
     }
 
@@ -366,7 +378,7 @@ public class Parser {
         //      NameExpression
         //@formatter:on
         final NameExpressionNode ne = parseNameExpression();
-        return new TypeNameNode(ts.postion(), ts.postion(), ne);
+        return new TypeNameNode(ts.position(), ts.position(), ne);
     }
 
     protected NameExpressionNode parseNameExpression() {
@@ -376,7 +388,7 @@ public class Parser {
         //@formatter:on
         assert ts.getCurrentToken() == Identifier || ts.getCurrentToken() == EscapedIdentifier;
         final IdentifierNode identifier = parseIdentifier();
-        return new NameExpressionNode(ts.postion(), ts.postion(), identifier);
+        return new NameExpressionNode(ts.position(), ts.position(), identifier);
     }
 
     protected <T extends AstNode & BasicTypeExpressionNode<T>> UnionTypeNode<T> parseUnionType() {
@@ -386,7 +398,7 @@ public class Parser {
         //@formatter:on
         assert ts.getCurrentToken() == LParen;
         final List<TypeExpressionNode<T>> list = parseTypeUnionList();
-        return new UnionTypeNode<T>(ts.postion(), ts.postion(), list);
+        return new UnionTypeNode<T>(ts.position(), ts.position(), list);
     }
 
     /**
@@ -407,7 +419,8 @@ public class Parser {
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         // TypeExpression | NonemptyTypeUnionList なので空の | は無効
         if (t == Or) {
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
 
         if (t == RParen) {
@@ -421,7 +434,8 @@ public class Parser {
             list.add(te);
             t = ts.scanTokenWithoutOf(Comment, LineTerminator);
             if (t == Eof) {
-                throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+                throw new ParserException(
+                    new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
             }
             if (t == Or) {
                 continue;
@@ -441,7 +455,7 @@ public class Parser {
         assert ts.getCurrentToken() == LBrace;
         List<FieldTypeNode<T>> list = parseFieldTypeList();
         assert ts.getCurrentToken() == RBrace;
-        return new RecordTypeNode<T>(ts.postion(), ts.postion(), list);
+        return new RecordTypeNode<T>(ts.position(), ts.position(), list);
     }
 
     /**
@@ -458,19 +472,22 @@ public class Parser {
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t == Comma) {
             // 空のカンマは許されない
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
         while (true) {
             switch (t) {
             case Eof:
-                throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+                throw new ParserException(
+                    new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
             case StringLiteral:
                 list.add(parseFieldType());
                 t = ts.scanTokenWithoutOf(Comment);
                 if (t == Comma || t == LineTerminator || t == RBrace) {
                     continue;
                 }
-                throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+                throw new ParserException(
+                    new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
             case LineTerminator:
             case Comma:
                 t = ts.scanTokenWithoutOf(Comment);
@@ -478,7 +495,8 @@ public class Parser {
             case RBrace:
                 return list;
             default:
-                throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+                throw new ParserException(
+                    new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
             }
         }
     }
@@ -493,12 +511,13 @@ public class Parser {
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         // JSON-DSでは型注釈の付かないフィールドは許されない
         if (t != Colon) {
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
         final TypeExpressionNode<T> te = parseTypeExpression();
 
-        final FieldNameNode.StringLiteral fn = AstContext.newStringLiteralFieldName(ts.postion(), ts.postion(), name);
-        return new FieldTypeNode<T>(ts.postion(), ts.postion(), fn, te);
+        final FieldNameNode.StringLiteral fn = AstContext.newStringLiteralFieldName(ts.position(), ts.position(), name);
+        return new FieldTypeNode<T>(ts.position(), ts.position(), fn, te);
     }
 
     protected <T extends AstNode & BasicTypeExpressionNode<T>> ArrayTypeNode<T> parseArrayType() {
@@ -511,7 +530,8 @@ public class Parser {
         final Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         // JSON-DSでは [,,,]や[ , foo]という記述は許可されない
         if (t == Comma) {
-            throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
         }
         ts.pushPendding(t);
         return parseElementTypeList();
@@ -548,12 +568,14 @@ public class Parser {
                 if (t == Comma) {
                     t = ts.scanTokenWithoutOf(Comment, LineTerminator);
                     if (t != RBracket) {
-                        throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+                        throw new ParserException(new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(),
+                            sourceName, ts.source()));
                     }
                 } else if (t != RBracket) {
-                    throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+                    throw new ParserException(
+                        new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
                 }
-                return new ArrayTypeNode<T>(ts.postion(), ts.postion(), list, variableType);
+                return new ArrayTypeNode<T>(ts.position(), ts.position(), list, variableType);
             } else if (t == RBracket) {
                 break;
             } else {
@@ -568,12 +590,13 @@ public class Parser {
                     ts.pushPendding(t);
                     continue;
                 } else if (t != RBracket) {
-                    throw new ParserException(0, ts.postion(), sourceName, ts.getSource());
+                    throw new ParserException(
+                        new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
                 }
                 break;
             }
         }
-        return new ArrayTypeNode<T>(ts.postion(), ts.postion(), list, variableType);
+        return new ArrayTypeNode<T>(ts.position(), ts.position(), list, variableType);
     }
 
     /**

@@ -5,6 +5,7 @@
 package com.github.tasogare.json.ds;
 
 /**
+ * XXX: ソースのlocationを持たせたほうが良いかもしれない
  * @author tasogare
  *
  */

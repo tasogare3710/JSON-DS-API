@@ -18,6 +18,8 @@ public class TokenStream {
     private final CharArrayWriter buffer;
     private Token currentToken;
     private Token pendding;
+    private int line;
+    private int lineStart;
 
     public TokenStream(final Source source) {
         this.source = source;
@@ -40,20 +42,27 @@ public class TokenStream {
         return asContentOf(Token.StringLiteral);
     }
 
-    public Token getCurrentToken() {
-        return currentToken;
+    public int column(){
+        return position() - lineStart;
     }
 
-    public Source getSource() {
-        return source;
+    public Token getCurrentToken() {
+        return currentToken;
     }
 
     public int length() {
         return source.length();
     }
 
-    public int postion() {
-        return source.postion();
+    /**
+     * @return the lineStart
+     */
+    public int lineStart() {
+        return lineStart;
+    }
+
+    public int position() {
+        return source.position();
     }
 
     public void pushPendding(Token t){
@@ -61,6 +70,14 @@ public class TokenStream {
             throw new IllegalStateException();
         }
         pendding = t;
+    }
+
+    /**
+     * ゼロ起算の行番号を返します。
+     * @return
+     */
+    public int row(){
+        return line;
     }
 
     /**
@@ -89,10 +106,14 @@ public class TokenStream {
             // <PS>
             // <CR> <LF>
             if (Source.isLineTerminator(c)) {
-                if (c == 0x000D && source.matchWithAdvance(0x000A)) {
+                if (c == 0x000D && source.match(0x000A)) {
+                    source.next();
+                    incrementLine(true);
+                    return currentToken(Token.LineTerminator);
+                } else {
+                    incrementLine(false);
                     return currentToken(Token.LineTerminator);
                 }
-                return currentToken(Token.LineTerminator);
             }
             break;
         }
@@ -110,8 +131,8 @@ public class TokenStream {
             throw new SourceException();
         case '/':
             // Comment ::
-            // MultiLineComment
-            // SingleLineComment
+            //      MultiLineComment
+            //      SingleLineComment
             if (source.matchWithAdvance('/')) {
                 return currentToken(readSingleLineComment());
             } else if (source.matchWithAdvance('*')) {
@@ -261,6 +282,10 @@ public class TokenStream {
         return t;
     }
 
+    public Source source() {
+        return source;
+    }
+
     private String asContentOf(Token t) {
         if (currentToken == t) {
             final String content = buffer.toString();
@@ -272,6 +297,11 @@ public class TokenStream {
 
     private Token currentToken(Token t) {
         return currentToken = t;
+    }
+
+    private void incrementLine(boolean isCRLF){
+        line += !isCRLF ? 1 : 2;
+        lineStart = position();
     }
 
     private int numValue(int c) {
@@ -333,12 +363,24 @@ public class TokenStream {
         // MultiLineNotForwardSlashOrAsteriskChar ::
         //      SourceCharacter but not one of / or *
         //@formatter:on
-        int c;
         // /* MultiLineCommentChars opt */
         do {
-            c = source.next();
+            final int c = source.next();
             if (c == Source.EOF) {
                 throw new SourceException("EOF");
+            }
+            // LineTerminatorSequence ::
+            // <LF>
+            // <CR> [lookahead ≠ <LF> ]
+            // <LS>
+            // <PS>
+            // <CR> <LF>
+            if (Source.isLineTerminator(c)) {
+                if (c == 0x000D && source.match(0x000A)) {
+                    incrementLine(false);
+                } else {
+                    incrementLine(false);
+                }
             }
             if (c == '*' && source.matchWithAdvance('/')) {
                 return Token.Comment;
@@ -377,8 +419,7 @@ public class TokenStream {
             if (c == Source.EOF) {
                 break;
             }
-            // SourceCharacter but not LineTerminator
-            // ~~~~~~~~~~~~~~~~~~~~~~
+            // *SourceCharacter but not* LineTerminator
             if (Source.isLineTerminator(c)) {
                 if (c == 0x000D && source.matchWithAdvance(0x000A)) {
                     // chars count of <CR> <LF> to two
@@ -410,15 +451,15 @@ public class TokenStream {
          * Optimization: if the source contains no escaped characters, create
          * the string directly from the source text.
          */
-        int stringStart = source.postion();
-        while (source.postion() < source.length()) {
+        int stringStart = source.position();
+        while (source.position() < source.length()) {
             int c = source.next();
             if (c <= '\u001F') {
                 throw new SourceException("String contains control character");
             } else if (c == '\\') {
                 break;
             } else if (c == '"') {
-                buffer.append(source.renge(stringStart, source.postion() - 1));
+                buffer.append(source.renge(stringStart, source.position() - 1));
                 return Token.StringLiteral;
             }
         }
@@ -428,10 +469,10 @@ public class TokenStream {
          * sequence of unescaped characters into a temporary buffer, then an
          * escaped character, and repeat until the entire string is consumed.
          */
-        while (source.postion() < source.length()) {
+        while (source.position() < source.length()) {
             assert source.match(-1, '\\');
-            buffer.append(source.renge(stringStart, source.postion() - 1));
-            if (source.postion() >= source.length()) {
+            buffer.append(source.renge(stringStart, source.position() - 1));
+            if (source.position() >= source.length()) {
                 throw new SourceException("Unterminated string");
             }
             int c = source.next();
@@ -467,15 +508,15 @@ public class TokenStream {
             default:
                 throw new SourceException("Unexpected character in string: '\\" + c + "'");
             }
-            stringStart = source.postion();
-            while (source.postion() < source.length()) {
+            stringStart = source.position();
+            while (source.position() < source.length()) {
                 c = source.next();
                 if (c <= '\u001F') {
                     throw new SourceException("String contains control character");
                 } else if (c == '\\') {
                     break;
                 } else if (c == '"') {
-                    buffer.append(source.renge(stringStart, source.postion() - 1));
+                    buffer.append(source.renge(stringStart, source.position() - 1));
                     return Token.StringLiteral;
                 }
             }
@@ -500,11 +541,11 @@ public class TokenStream {
                 c = -1;
             }
         } else {
-//            UnicodeEscapeSequence :: 
-//                u Hex4Digits  
-//                u{ HexDigits } 
-//            Hex4Digits :: 
-//                HexDigit HexDigit HexDigit HexDigit
+            // UnicodeEscapeSequence ::
+            //      u Hex4Digits
+            //      u{ HexDigits }
+            // Hex4Digits ::
+            //      HexDigit HexDigit HexDigit HexDigit
             c = (numValue(c) << 12) | (numValue(source.next()) << 8) | (numValue(source.next()) << 4) | numValue(source.next());
         }
         if (!Character.isValidCodePoint(c)) {

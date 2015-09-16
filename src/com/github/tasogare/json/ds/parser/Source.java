@@ -162,7 +162,7 @@ public final class Source {
 
     private final int length;
 
-    private int postion;
+    private int position;
 
     /**
      * 
@@ -182,8 +182,12 @@ public final class Source {
         return length;
     }
 
-    public int postion() {
-        return postion;
+    public int position() {
+        return position;
+    }
+
+    public String renge(final int start, final int end) {
+        return source.substring(start, end);
     }
 
     boolean match(final int c) throws IndexOutOfBoundsException {
@@ -208,7 +212,7 @@ public final class Source {
         if (c != peek(pos)) {
             return false;
         }
-        postion += Character.charCount(c);
+        position += Character.charCount(c);
         return true;
     }
 
@@ -234,7 +238,7 @@ public final class Source {
      */
     void mustMatchWithAdvance(final int c) throws SourceException, IndexOutOfBoundsException {
         mustMatch(c);
-        postion += Character.charCount(c);
+        position += Character.charCount(c);
     }
 
     /**
@@ -244,7 +248,7 @@ public final class Source {
      */
     int next() throws IndexOutOfBoundsException {
         final int cp = peek();
-        postion += Character.charCount(cp);
+        position += Character.charCount(cp);
         return cp;
     }
 
@@ -257,25 +261,21 @@ public final class Source {
      * 
      * @param offset
      * @return
-     * @throws IndexOutOfBoundsException {@code postion + offset < 0}のとき
+     * @throws IndexOutOfBoundsException {@code position + offset < 0}のとき
      */
     int peek(int offset) throws IndexOutOfBoundsException {
-        if (postion + offset >= length) {
+        if (position + offset >= length) {
             return EOF;
         }
-        return source.codePointAt(postion + offset);
+        return source.codePointAt(position + offset);
     }
 
     void pushback(final int i) {
         assert 0 < i;
-        final int newPos = postion - i;
+        final int newPos = position - i;
         if (0 > newPos) {
             throw new IndexOutOfBoundsException(String.valueOf(newPos));
         }
-        postion = newPos;
-    }
-
-    String renge(final int start, final int end) {
-        return source.substring(start, end);
+        position = newPos;
     }
 }

@@ -44,7 +44,7 @@ public class SourceOfZeroTest {
     @Test
     public void testZeroPosition() {
         final Source source = new Source("");
-        assertThat(source.postion(), is(0));
+        assertThat(source.position(), is(0));
     }
 
     @Test
@@ -129,9 +129,9 @@ public class SourceOfZeroTest {
     @Test
     public void testZeroMatchWithAdvance_Int_IntOverrun(){
         final Source source = new Source("");
-        final int pos = source.postion();
+        final int pos = source.position();
         assertThat(source.matchWithAdvance(0, Source.EOF), is(true));
-        assertThat(pos + 1, is(source.postion()));
+        assertThat(pos + 1, is(source.position()));
     }
 
     /**
@@ -141,17 +141,17 @@ public class SourceOfZeroTest {
     @Test
     public void testZeroMatchWithAdvance_IntOverrun(){
         final Source source = new Source("");
-        final int pos = source.postion();
+        final int pos = source.position();
         assertThat(source.matchWithAdvance(Source.EOF), is(true));
-        assertThat(pos + 1, is(source.postion()));
+        assertThat(pos + 1, is(source.position()));
     }
 
     @Test
     public void testZeroMustMatch_Int(){
         final Source source = new Source("");
-        final int pos = source.postion();
+        final int pos = source.position();
         source.mustMatch(Source.EOF);
-        assertThat(pos, is(source.postion()));
+        assertThat(pos, is(source.position()));
     }
 
     @Test(expected=SourceException.class)
@@ -163,9 +163,9 @@ public class SourceOfZeroTest {
     @Test
     public void testZeroMustMatchWithAdvance_Int(){
         final Source source = new Source("");
-        final int pos = source.postion();
+        final int pos = source.position();
         source.mustMatchWithAdvance(Source.EOF);
-        assertThat(pos + 1, is(source.postion()));
+        assertThat(pos + 1, is(source.position()));
     }
 
     @Test(expected=SourceException.class)

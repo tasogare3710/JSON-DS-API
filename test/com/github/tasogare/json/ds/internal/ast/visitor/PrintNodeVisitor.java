@@ -33,6 +33,7 @@ import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 import com.github.tasogare.json.ds.parser.Parser;
 import com.github.tasogare.json.ds.parser.ParserException;
 import com.github.tasogare.json.ds.parser.Source;
+import com.github.tasogare.json.ds.parser.SourceInfo;
 import com.github.tasogare.json.ds.parser.TokenStream;
 
 public final class PrintNodeVisitor implements NodeVisitor<String> {
@@ -48,9 +49,10 @@ public final class PrintNodeVisitor implements NodeVisitor<String> {
             PrintNodeVisitor.print(p);
             System.exit(0);
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             System.exit(1);
         } catch (IOException e1) {

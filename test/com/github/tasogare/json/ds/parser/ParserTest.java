@@ -57,9 +57,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -76,9 +77,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -95,9 +97,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -116,9 +119,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -150,9 +154,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -211,9 +216,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -230,13 +236,36 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
         System.out.println(p);
+    }
+
+    @Test
+    public void testSourceLocation() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testSourceLocation.jsds";
+        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            parser.parse();
+        } catch(ParserException e){
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println("row: " + info.getRow() + " col: " + info.getColumn());
+            System.err.println(info.getSource().renge(info.getLineStart(), info.getPosition()));
+            final StringBuilder sb = new StringBuilder();
+            for(int i=0; i< info.getColumn() - 1; i++){
+                sb.append(" ");
+            }
+            System.err.println(sb.append("^").toString());
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -249,9 +278,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -277,9 +307,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, "raw string");
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -296,9 +327,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -315,9 +347,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -329,16 +362,16 @@ public class ParserTest {
         final String name = "com/github/tasogare/json/ds/parser/resources/UnionType.js";
         final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
         ProgramNode<?> p = null;
-        Source input = null;
         try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            input = new Source(r);
+            final Source input = new Source(r);
             final TokenStream ts = new TokenStream(input);
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(input.renge(0, e.getEndPosition()));
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println("row: " + info.getRow() + " col: " + info.getColumn());
+            System.err.println(info.getSource().renge(info.getLineStart(), info.getPosition()));
             e.printStackTrace();
             fail();
         }
@@ -351,14 +384,15 @@ public class ParserTest {
         final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
         ProgramNode<?> p = null;
         try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            Source input = new Source(r);
+            final Source input = new Source(r);
             final TokenStream ts = new TokenStream(input);
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getSource().renge(0, e.getEndPosition()));
-            System.err.println(e.getStartPosition() + ", " +e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow() + ", " +info.getColumn());
+            System.err.println(info.getSource().renge(info.getLineStart(), info.getPosition()));
             e.printStackTrace();
             fail();
         }
@@ -370,16 +404,16 @@ public class ParserTest {
         final String name = "com/github/tasogare/json/ds/parser/resources/RecordType.js";
         final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
         ProgramNode<?> p = null;
-        Source input = null;
         try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            input = new Source(r);
+            final Source input = new Source(r);
             final TokenStream ts = new TokenStream(input);
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(input.renge(0, e.getEndPosition()));
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println("row: " + info.getRow() + " col: " + info.getColumn());
+            System.err.println(info.getSource().renge(info.getLineStart(), info.getPosition()));
             e.printStackTrace();
             fail();
         }
@@ -396,9 +430,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -441,9 +476,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }
@@ -460,9 +496,10 @@ public class ParserTest {
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            System.err.println(e.getSourceName());
-            System.err.println(e.getStartPosition());
-            System.err.println(e.getEndPosition());
+            final SourceInfo info = e.getSourceInfo();
+            System.err.println(info.getSourceName());
+            System.err.println(info.getRow());
+            System.err.println(info.getColumn());
             e.printStackTrace();
             fail();
         }

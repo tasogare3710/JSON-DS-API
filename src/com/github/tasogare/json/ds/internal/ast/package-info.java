@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 /**
+ * TODO: ドキュメントコメントやASTをデータモデルとして利用するためにCommentノードが必要ではないか？
  * ASTは不変であり、かつクローンをサポートします。
  * @author tasogare
  *

@@ -9,67 +9,42 @@ package com.github.tasogare.json.ds.parser;
  * @author tasogare
  *
  */
-public class ParserException extends RuntimeException {
+public final class ParserException extends RuntimeException {
     private static final long serialVersionUID = 6185281711673419231L;
 
-    private final int startPosition;
-    private final int endPosition;
-    private final String sourceName;
-    private final Source source;
+    private final SourceInfo sourceInfo;
 
-    public ParserException(final int startPosition, final int endPosition, final String sourceName, final Source source) {
+    public ParserException(SourceInfo sourceInfo) {
         super();
-        this.startPosition = startPosition;
-        this.endPosition = endPosition;
-        this.sourceName = sourceName;
-        this.source = source;
+        this.sourceInfo = sourceInfo;
     }
 
-    public ParserException(final String message, final int startPosition, final int endPosition, final String sourceName, final Source source) {
+    public ParserException(String message, SourceInfo sourceInfo) {
         super(message);
-        this.startPosition = startPosition;
-        this.endPosition = endPosition;
-        this.sourceName = sourceName;
-        this.source = source;
+        this.sourceInfo = sourceInfo;
     }
 
-    public ParserException(final Throwable cause, final int startPosition, final int endPosition, final String sourceName, final Source source) {
+    public ParserException(Throwable cause, SourceInfo sourceInfo) {
         super(cause);
-        this.startPosition = startPosition;
-        this.endPosition = endPosition;
-        this.sourceName = sourceName;
-        this.source = source;
+        this.sourceInfo = sourceInfo;
     }
 
-    public ParserException(final String message, final Throwable cause, final int startPosition, final int endPosition, final String sourceName, final Source source) {
+    public ParserException(String message, Throwable cause, SourceInfo sourceInfo) {
         super(message, cause);
-        this.startPosition = startPosition;
-        this.endPosition = endPosition;
-        this.sourceName = sourceName;
-        this.source = source;
+        this.sourceInfo = sourceInfo;
     }
 
-    public ParserException(final String message, final Throwable cause, final boolean enableSuppression, final boolean writableStackTrace, final int startPosition, final int endPosition, final String sourceName, final Source source) {
+    public ParserException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace,
+        SourceInfo sourceInfo)
+    {
         super(message, cause, enableSuppression, writableStackTrace);
-        this.startPosition = startPosition;
-        this.endPosition = endPosition;
-        this.sourceName = sourceName;
-        this.source = source;
+        this.sourceInfo = sourceInfo;
     }
 
-    public int getStartPosition() {
-        return startPosition;
-    }
-
-    public int getEndPosition() {
-        return endPosition;
-    }
-
-    public String getSourceName() {
-        return sourceName;
-    }
-
-    public Source getSource() {
-        return source;
+    /**
+     * @return the sourceInfo
+     */
+    public SourceInfo getSourceInfo() {
+        return sourceInfo;
     }
 }
