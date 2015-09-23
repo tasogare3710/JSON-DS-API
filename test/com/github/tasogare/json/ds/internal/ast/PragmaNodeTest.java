@@ -44,8 +44,8 @@ public class PragmaNodeTest {
         final PragmaNode pragma = new PragmaNode(0, 10, "use", pragmaItems);
         assertThat(pragma.getName(), equalTo("use"));
 
-        for(final IdentifierNode idn : pragma.<IdentifierNode>getPragmaItems()){
-            assertThat(idn.getString(), equalTo("strict"));
+        for(final IdentifierNode ident : pragma.<IdentifierNode>getPragmaItems()){
+            assertThat(ident.getString(), equalTo("strict"));
         }
     }
 

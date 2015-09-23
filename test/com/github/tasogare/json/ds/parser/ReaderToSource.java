@@ -4,12 +4,11 @@
 
 package com.github.tasogare.json.ds.parser;
 
+import static com.github.tasogare.json.ds.tests.AllTest.newReader;
+
 import java.io.BufferedReader;
 import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -39,8 +38,8 @@ public class ReaderToSource {
 
     @Test
     public void test() throws IOException {
-        InputStream is = getClass().getClassLoader().getResourceAsStream("com/github/tasogare/json/ds/parser/resources/ReaderTest.txt");
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+        final String name = "com/github/tasogare/json/ds/parser/resources/ReaderTest.txt";
+        try(final BufferedReader r = newReader(name, getClass())){
             final Source source = new Source(r);
             final CharArrayWriter caw = new CharArrayWriter();
             int codePoint;

@@ -9,6 +9,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static com.github.tasogare.json.ds.internal.ast.AstContext.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +68,7 @@ public class AstNodeCloneableTest {
     @Test
     public void testNullLiteral() throws CloneNotSupportedException {
         final NullLiteralNode node = new NullLiteralNode(0, 4);
-        NullLiteralNode c = (NullLiteralNode) node.clone();
+        final NullLiteralNode c = (NullLiteralNode) node.clone();
 
         assertThat(c, not(node));
         assertThat(c, instanceOf(NullLiteralNode.class));
@@ -76,7 +77,7 @@ public class AstNodeCloneableTest {
     @Test
     public void testStringLiteral() throws CloneNotSupportedException {
         final StringLiteralNode node = new StringLiteralNode(0, 5, "aaa");
-        StringLiteralNode c = (StringLiteralNode) node.clone();
+        final StringLiteralNode c = (StringLiteralNode) node.clone();
 
         assertThat(c, not(node));
         assertThat(c.getString(), equalTo(node.getString()));
@@ -105,7 +106,7 @@ public class AstNodeCloneableTest {
 
     @Test
     public void testTypeName() throws CloneNotSupportedException {
-        final TypeNameNode node = new TypeNameNode(0, 5, new NameExpressionNode(0, 5, new IdentifierNode(0, 5, "aaa")));
+        final TypeNameNode node = newTypeName(0, 5, "aaa");
         final TypeNameNode c = (TypeNameNode) node.clone();
 
         assertThat(c, not(node));
@@ -129,7 +130,7 @@ public class AstNodeCloneableTest {
     @Test
     public void testVariableArrayType() throws CloneNotSupportedException {
         //"type A = [...number];"
-        final ArrayTypeNode<TypeNameNode> node = new ArrayTypeNode<>(9, 20, new TypeExpressionNode<TypeNameNode>(10, 19, new TypeNameNode(13, 19, new NameExpressionNode(13, 19, new IdentifierNode(13,  19, "number")))));
+        final ArrayTypeNode<TypeNameNode> node = new ArrayTypeNode<>(9, 20, new TypeExpressionNode<TypeNameNode>(10, 19, newTypeName(13, 19, "number")));
         @SuppressWarnings("unchecked")
         final ArrayTypeNode<TypeNameNode> c = (ArrayTypeNode<TypeNameNode>) node.clone();
 
@@ -147,8 +148,8 @@ public class AstNodeCloneableTest {
     public void testArrayType() throws CloneNotSupportedException{
         //"type A = [number, string];"
         final List<TypeExpressionNode<TypeNameNode>> list = new ArrayList<>();
-        list.add(new TypeExpressionNode<>(10, 16, new TypeNameNode(10, 16, new NameExpressionNode(10, 16, new IdentifierNode(10, 16, "number")))));
-        list.add(new TypeExpressionNode<>(18, 24, new TypeNameNode(18,  24, new NameExpressionNode(18,  24, new IdentifierNode(18,  24, "string")))));
+        list.add(new TypeExpressionNode<>(10, 16, newTypeName(10, 16, "number")));
+        list.add(new TypeExpressionNode<>(18, 24, newTypeName(18,  24, "string")));
         final ArrayTypeNode<TypeNameNode> node = new ArrayTypeNode<>(9, 25, list);
         @SuppressWarnings("unchecked")
         final ArrayTypeNode<TypeNameNode> c = (ArrayTypeNode<TypeNameNode>) node.clone();
@@ -168,8 +169,8 @@ public class AstNodeCloneableTest {
     public void testUnionType() throws CloneNotSupportedException {
         // "type U = (A | B);"
         final List<TypeExpressionNode<TypeNameNode>> list= new ArrayList<>();
-        list.add(new TypeExpressionNode<TypeNameNode>(10, 11, new TypeNameNode(10, 11, new NameExpressionNode(10, 11, new IdentifierNode(10, 11, "A")))));
-        list.add(new TypeExpressionNode<TypeNameNode>(14, 15, new TypeNameNode(14, 15, new NameExpressionNode(14, 15, new IdentifierNode(14, 15, "B")))));
+        list.add(new TypeExpressionNode<TypeNameNode>(10, 11, newTypeName(10, 11, "A")));
+        list.add(new TypeExpressionNode<TypeNameNode>(14, 15, newTypeName(14, 15, "B")));
         final UnionTypeNode<TypeNameNode> node = new UnionTypeNode<>(9, 16, list);
         @SuppressWarnings("unchecked")
         final UnionTypeNode<TypeNameNode> c = (UnionTypeNode<TypeNameNode>) node.clone();
@@ -207,14 +208,10 @@ public class AstNodeCloneableTest {
         //"type R = { "a": number, "b": string };"
         final List<FieldTypeNode<TypeNameNode>> list= new ArrayList<>();
 
-        final FieldNameNode.StringLiteral a = new FieldNameNode.StringLiteral(11, 14, new StringLiteralNode(11, 14, "a"));
-        final TypeExpressionNode<TypeNameNode> av = new TypeExpressionNode<>(16, 22, new TypeNameNode(16, 22, new NameExpressionNode(16, 22, new IdentifierNode(16, 22, "number"))));
+        list.add(newFieldType(11, 22, 11, 14, "a", new TypeExpressionNode<>(16, 22, newTypeName(16, 22, "number"))));
 
-        final FieldNameNode.StringLiteral b = new FieldNameNode.StringLiteral(24, 27, new StringLiteralNode(24, 27, "b"));
-        final TypeExpressionNode<TypeNameNode> bv = new TypeExpressionNode<>(29, 35, new TypeNameNode(29, 35, new NameExpressionNode(29, 35, new IdentifierNode(29, 35, "string"))));
+        list.add(newFieldType(24, 35, 24, 27, "b", new TypeExpressionNode<>(29, 35, newTypeName(29, 35, "string"))));
 
-        list.add(new FieldTypeNode<TypeNameNode>(11, 22, a, av));
-        list.add(new FieldTypeNode<TypeNameNode>(24, 35, b, bv));
         final RecordTypeNode<TypeNameNode> node = new RecordTypeNode<>(9, 37, list);
         @SuppressWarnings("unchecked")
         final RecordTypeNode<TypeNameNode> c = (RecordTypeNode<TypeNameNode>) node.clone();
@@ -237,7 +234,7 @@ public class AstNodeCloneableTest {
 
     @Test
     public void testTypeExpression() throws CloneNotSupportedException {
-        final TypeExpressionNode<TypeNameNode> node = new TypeExpressionNode<>(10, 19, new TypeNameNode(13, 19, new NameExpressionNode(13, 19, new IdentifierNode(13,  19, "number"))));
+        final TypeExpressionNode<TypeNameNode> node = new TypeExpressionNode<>(10, 19, newTypeName(13, 19, "number"));
         @SuppressWarnings("unchecked")
         final TypeExpressionNode<TypeNameNode> c = (TypeExpressionNode<TypeNameNode>) node.clone();
 
@@ -252,7 +249,7 @@ public class AstNodeCloneableTest {
 
     @Test
     public void testStringLiteralFieldNameNode() throws CloneNotSupportedException {
-        final FieldNameNode.StringLiteral node = new FieldNameNode.StringLiteral(0, 3, new StringLiteralNode(0, 3, "a"));
+        final FieldNameNode.StringLiteral node = newStringLiteralFieldName(0, 3, "a");
         final FieldNameNode.StringLiteral c = (FieldNameNode.StringLiteral) node.clone();
 
         assertThat(c, not(node));
@@ -265,7 +262,8 @@ public class AstNodeCloneableTest {
     @Test
     public void testFieldType() throws CloneNotSupportedException {
         //"type T = {"a": number}"
-        final FieldTypeNode<TypeNameNode> node = new FieldTypeNode<TypeNameNode>(10, 21, new FieldNameNode.StringLiteral(10, 13, new StringLiteralNode(10, 13, "a")), new TypeExpressionNode<TypeNameNode>(15, 21, new TypeNameNode(15, 21, new NameExpressionNode(15, 21, new IdentifierNode(15, 21, "number"))), false));
+        final TypeExpressionNode<TypeNameNode> te = new TypeExpressionNode<TypeNameNode>(15, 21, newTypeName(15, 21, "number"), false);
+        final FieldTypeNode<TypeNameNode> node = newFieldType(10, 21, 10, 13, "a", te);
         @SuppressWarnings("unchecked")
         final FieldTypeNode<TypeNameNode> c = (FieldTypeNode<TypeNameNode>) node.clone();
 
@@ -280,7 +278,7 @@ public class AstNodeCloneableTest {
     @Test
     public void testTypeDefinition() throws CloneNotSupportedException {
         //"type T = number;"
-        final TypeDefinitionNode<TypeNameNode> node = new  TypeDefinitionNode<>(0, 15, new IdentifierNode(5, 6, "T"), new TypeExpressionNode<>(9, 15, new TypeNameNode(9, 15, new NameExpressionNode(9, 15, new IdentifierNode(9,  15, "number")))));
+        final TypeDefinitionNode<TypeNameNode> node = new  TypeDefinitionNode<>(0, 15, new IdentifierNode(5, 6, "T"), new TypeExpressionNode<>(9, 15, newTypeName(9, 15, "number")));
         @SuppressWarnings("unchecked")
         final TypeDefinitionNode<TypeNameNode> c = (TypeDefinitionNode<TypeNameNode>) node.clone();
 

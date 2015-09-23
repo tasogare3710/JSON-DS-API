@@ -8,6 +8,7 @@ import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
+import static com.github.tasogare.json.ds.internal.ast.AstContext.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.github.tasogare.json.ds.internal.ast.ArrayTypeNode;
-import com.github.tasogare.json.ds.internal.ast.AstContext;
 import com.github.tasogare.json.ds.internal.ast.IdentifierNode;
 import com.github.tasogare.json.ds.internal.ast.ProgramNode;
 import com.github.tasogare.json.ds.internal.ast.TypeDefinitionNode;
@@ -54,11 +54,11 @@ public class ProgramNodeTest {
         //"type A = string;"
         //"type B = number;"
         final IdentifierNode A = new IdentifierNode(5, 6, "A");
-        final TypeExpressionNode<TypeNameNode> aInitializer = new TypeExpressionNode<>(9, 15, AstContext.newTypeName(9, 15, "string"));
+        final TypeExpressionNode<TypeNameNode> aInitializer = new TypeExpressionNode<>(9, 15, newTypeName(9, 15, "string"));
         final TypeDefinitionNode<TypeNameNode> aDefinition = new TypeDefinitionNode<>(0, 15, A, aInitializer);
 
         final IdentifierNode B = new IdentifierNode(21, 22, "B");
-        final TypeExpressionNode<TypeNameNode> bInitializer = new TypeExpressionNode<>(25, 32, AstContext.newTypeName(25, 32, "number"));
+        final TypeExpressionNode<TypeNameNode> bInitializer = new TypeExpressionNode<>(25, 32, newTypeName(25, 32, "number"));
         final TypeDefinitionNode<TypeNameNode> bDefinition = new TypeDefinitionNode<>(17, 33, B, bInitializer);
 
         final ArrayList<TypeDefinitionNode<? extends BasicTypeExpressionNode<?>>> list = new ArrayList<>();
@@ -79,13 +79,13 @@ public class ProgramNodeTest {
         //"type A = string;"
         //"type B = [number, string];"
         final IdentifierNode A = new IdentifierNode(5, 6, "A");
-        final TypeExpressionNode<TypeNameNode> aInitializer = new TypeExpressionNode<>(9, 15, AstContext.newTypeName(9, 15, "string"));
+        final TypeExpressionNode<TypeNameNode> aInitializer = new TypeExpressionNode<>(9, 15, newTypeName(9, 15, "string"));
         final TypeDefinitionNode<TypeNameNode> aDefinition = new TypeDefinitionNode<>(0, 15, A, aInitializer);
 
         final IdentifierNode B = new IdentifierNode(21, 22, "B");
         final List<TypeExpressionNode<TypeNameNode>> list = new ArrayList<>();
-        list.add(new TypeExpressionNode<>(10, 16, AstContext.newTypeName(10, 16, "number")));
-        list.add(new TypeExpressionNode<>(18, 24, AstContext.newTypeName(18,  24, "string")));
+        list.add(new TypeExpressionNode<>(10, 16, newTypeName(10, 16, "number")));
+        list.add(new TypeExpressionNode<>(18, 24, newTypeName(18,  24, "string")));
         final ArrayTypeNode<TypeNameNode> arrayType = new ArrayTypeNode<>(9, 25, list);
         final TypeExpressionNode<ArrayTypeNode<TypeNameNode>> bInitializer = new TypeExpressionNode<>(25, 32, arrayType);
         final TypeDefinitionNode<ArrayTypeNode<TypeNameNode>> bDefinition = new TypeDefinitionNode<>(17, 33, B, bInitializer);

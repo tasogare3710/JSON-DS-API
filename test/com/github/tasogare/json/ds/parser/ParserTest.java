@@ -6,12 +6,11 @@ package com.github.tasogare.json.ds.parser;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
+import static com.github.tasogare.json.ds.tests.AllTest.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -29,6 +28,10 @@ import com.github.tasogare.json.ds.parser.ParserException;
 import com.github.tasogare.json.ds.parser.Source;
 import com.github.tasogare.json.ds.parser.TokenStream;
 
+/**
+ * @author tasogare
+ *
+ */
 public class ParserTest {
 
     @BeforeClass
@@ -48,290 +51,15 @@ public class ParserTest {
     }
 
     @Test
-    public void testPragma1() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testPragma1.js";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
-            fail();
-        }
-        System.out.println(p);
-    }
-
-    @Test
-    public void testPragma2() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testPragma2.jsds";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
-            fail();
-        }
-        System.out.println(p);
-    }
-
-    @Test
-    public void testPragmaIsUseOfStrict() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testPragmaIsUseOfStrict.js";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
-            fail();
-        }
-        final IdentifierNode in = p.getPragmas().get(0).<IdentifierNode>getPragmaItems().get(0);
-        assertThat(in, instanceOf(ContextuallyReservedIdentifierNode.class));
-        assertTrue(((ContextuallyReservedIdentifierNode)in).isStrict());
-    }
-
-    @Test
-    public void testPragmaIsUseOfStandard() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testPragmaIsUseOfStandard.js";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
-            fail();
-        }
-        final IdentifierNode in = p.getPragmas().get(0).<IdentifierNode>getPragmaItems().get(0);
-        assertThat(in, instanceOf(ContextuallyReservedIdentifierNode.class));
-        assertTrue(((ContextuallyReservedIdentifierNode)in).isStandard());
-    }
-
-    @Test(expected=ParserException.class)
-    public void testBadUsePragma() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testBadUsePragma.js";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        }
-        System.out.println(p);
-    }
-
-    @Test
-    public void testPragmaIsInclude() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testPragmaIsInclude.jsds";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
-            fail();
-        }
-        final PragmaNode includePragma = p.getPragmas().get(1);
-        assertThat(includePragma.getName(), equalTo("include"));
-        final StringLiteralNode strLite = includePragma.<StringLiteralNode>getPragmaItems().get(0);
-        assertThat(strLite.getString(), equalTo("./Comments.js"));
-    }
-
-    @Test(expected=ParserException.class)
-    public void testBadIncludePragma() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testBadIncludePragma.jsds";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        }
-        System.out.println(p);
-    }
-
-    @Test(expected = ParserException.class)
-    public void testBadIncludePragmaInMultiItem() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testBadIncludePragmaInMultiItem.jsds";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        }
-        System.out.println(p);
-    }
-
-    @Test
-    public void testEmptyPragma() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testEmptyPragma.jsds";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        }
-        System.out.println(p);
-    }
-
-    @Test
     public void test() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/test.js";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
         ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+        final String name = "com/github/tasogare/json/ds/parser/resources/test.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
             final TokenStream ts = new TokenStream(new Source(r));
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
-            fail();
-        }
-        System.out.println(p);
-    }
-
-    @Test
-    public void tes2() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/inlineDef.js";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
-            fail();
-        }
-        System.out.println(p);
-    }
-
-    @Test
-    public void testSourceLocation() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testSourceLocation.jsds";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println("row: " + info.getRow() + " col: " + info.getColumn());
-            System.err.println(info.getSource().renge(info.getLineStart(), info.getPosition()));
-            final StringBuilder sb = new StringBuilder();
-            for(int i=0; i< info.getColumn() - 1; i++){
-                sb.append(" ");
-            }
-            System.err.println(sb.append("^").toString());
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void testAsteriskAnyType() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/asteriskAnyType.js";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
-            fail();
-        }
-        System.out.println(p);
-    }
-
-    @Test(expected=ParserException.class)
-    public void testRecordTypeWithoutTypeAnnotation() throws IOException {
-        ProgramNode<?> p = null;
-        // FieldType :=   FieldName    の形式を正しく処理してなかった
-        final TokenStream ts = new TokenStream(new Source("type T={\"name\"\n}"));
-        final Parser parser = new Parser(ts, "raw string");
-        p = parser.parse();
-        System.out.println(p);
-    }
-
-    @Test
-    public void test3() throws IOException {
-        ProgramNode<?> p = null;
-        // 末尾カンマとラインターミネータを正しく処理してなかった。
-        try {
-            final TokenStream ts = new TokenStream(new Source("type T=[number,\r\n];"));
-            final Parser parser = new Parser(ts, "raw string");
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
-            fail();
-        }
-        System.out.println(p);
-    }
-
-    @Test
-    public void testVariableArrayType() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/variableArrayType.js";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
+            reportError(e);
             fail();
         }
         System.out.println(p);
@@ -339,168 +67,29 @@ public class ParserTest {
 
     @Test
     public void testArrayType() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/ArrayType.js";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
         ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+        final String name = "com/github/tasogare/json/ds/parser/resources/testArrayType.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
             final TokenStream ts = new TokenStream(new Source(r));
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
+            reportError(e);
             fail();
         }
         System.out.println(p);
     }
 
     @Test
-    public void testUnionType() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/UnionType.js";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+    public void testAsteriskAnyType() throws IOException {
         ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final Source input = new Source(r);
-            final TokenStream ts = new TokenStream(input);
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println("row: " + info.getRow() + " col: " + info.getColumn());
-            System.err.println(info.getSource().renge(info.getLineStart(), info.getPosition()));
-            e.printStackTrace();
-            fail();
-        }
-        System.out.println(p);
-    }
-
-    @Test
-    public void testComments() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/Comments.js";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final Source input = new Source(r);
-            final TokenStream ts = new TokenStream(input);
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow() + ", " +info.getColumn());
-            System.err.println(info.getSource().renge(info.getLineStart(), info.getPosition()));
-            e.printStackTrace();
-            fail();
-        }
-        System.out.println(p);
-    }
-
-    @Test
-    public void testRecordType() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/RecordType.js";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final Source input = new Source(r);
-            final TokenStream ts = new TokenStream(input);
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println("row: " + info.getRow() + " col: " + info.getColumn());
-            System.err.println(info.getSource().renge(info.getLineStart(), info.getPosition()));
-            e.printStackTrace();
-            fail();
-        }
-        System.out.println(p);
-    }
-
-    @Test
-    public void testWithComment() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testWithComment.js";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+        final String name = "com/github/tasogare/json/ds/parser/resources/testAsteriskAnyType.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
             final TokenStream ts = new TokenStream(new Source(r));
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
         } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
-            fail();
-        }
-        System.out.println(p);
-    }
-
-    @Test(expected=ParserException.class)
-    public void testEmptyUnionTypeWithComma() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/emptyUnionTypeWithComma.js";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        }
-        System.out.println(p);
-    }
-
-    @Test(expected=ParserException.class)
-    public void testEmptyRecordWithComma() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/emptyRecordWithComma.js";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        }
-        System.out.println(p);
-    }
-
-    @Test
-    public void testEmptyArray() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/emptyArray.js";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
-            fail();
-        }
-        System.out.println(p);
-    }
-
-    @Test
-    public void testEscapedReservedIdentifier() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testEscapedReservedIdentifier.js";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final TokenStream ts = new TokenStream(new Source(r));
-            final Parser parser = new Parser(ts, name);
-            p = parser.parse();
-        } catch(ParserException e){
-            final SourceInfo info = e.getSourceInfo();
-            System.err.println(info.getSourceName());
-            System.err.println(info.getRow());
-            System.err.println(info.getColumn());
-            e.printStackTrace();
+            reportError(e);
             fail();
         }
         System.out.println(p);
@@ -511,23 +100,136 @@ public class ParserTest {
      */
     @Test(expected=ParserException.class)
     public void testBadIdentifierByEscapedReservedIdentifier() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testBadIdentifierByEscapedReservedIdentifier.js";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+        final String name = "com/github/tasogare/json/ds/parser/resources/testBadIdentifierByEscapedReservedIdentifier.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            parser.parse();
+        }
+        fail();
+    }
+
+    @Test(expected=ParserException.class)
+    public void testBadIncludePragma() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testBadIncludePragma.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            parser.parse();
+        }
+        fail();
+    }
+
+    @Test(expected = ParserException.class)
+    public void testBadIncludePragmaInMultiItem() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testBadIncludePragmaInMultiItem.jsds";
+        try (BufferedReader r = newReader(name, getClass())) {
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            parser.parse();
+        }
+        fail();
+    }
+
+    @Test(expected=ParserException.class)
+    public void testBadRecordTypeByWithoutTypeAnnotation() throws IOException {
+        // FieldType :=   FieldName    の形式を正しく処理してなかった
+        final TokenStream ts = new TokenStream(new Source("type T={\"name\"\n}"));
+        final Parser parser = new Parser(ts, "raw string");
+        parser.parse();
+    }
+
+    @Test(expected=ParserException.class)
+    public void testBadUsePragma() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testBadUsePragma.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            parser.parse();
+        }
+        fail();
+    }
+
+    @Test(expected=ParserException.class)
+    public void testBadUseStandard() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testBadUseStandard.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            parser.parse();
+        }
+        fail();
+    }
+
+    @Test(expected=ParserException.class)
+    public void testBadUseStrict() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testBadUseStrict.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            parser.parse();
+        }
+        fail();
+    }
+
+    @Test
+    public void testComments() throws IOException {
         ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+        final String name = "com/github/tasogare/json/ds/parser/resources/testComments.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final Source input = new Source(r);
+            final TokenStream ts = new TokenStream(input);
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
+        }
+        System.out.println(p);
+    }
+
+    @Test
+    public void testEmptyArray() throws IOException {
+        ProgramNode<?> p = null;
+        final String name = "com/github/tasogare/json/ds/parser/resources/testEmptyArray.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
             final TokenStream ts = new TokenStream(new Source(r));
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
         }
         System.out.println(p);
     }
 
     @Test(expected=ParserException.class)
     public void testEmptyArrayWithComma() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/emptyArrayWithComma.js";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+        final String name = "com/github/tasogare/json/ds/parser/resources/testEmptyArrayWithComma.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            parser.parse();
+        }
+        fail();
+    }
+
+    @Test(expected=ParserException.class)
+    public void testEmptyBadFixedArray() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testEmptyBadFixedArray.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            parser.parse();
+        }
+        fail();
+    }
+
+    @Test
+    public void testEmptyPragma() throws IOException {
         ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+        final String name = "com/github/tasogare/json/ds/parser/resources/testEmptyPragma.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
             final TokenStream ts = new TokenStream(new Source(r));
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
@@ -536,14 +238,220 @@ public class ParserTest {
     }
 
     @Test(expected=ParserException.class)
-    public void testEmptyBadFixedArray() throws IOException {
-        final String name = "com/github/tasogare/json/ds/parser/resources/testEmptyBadFixedArray.js";
-        InputStream is = getClass().getClassLoader().getResourceAsStream(name);
+    public void testEmptyRecordWithComma() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testEmptyRecordWithComma.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            parser.parse();
+        }
+        fail();
+    }
+
+    @Test(expected=ParserException.class)
+    public void testEmptyUnionTypeWithComma() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testEmptyUnionTypeWithComma.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            parser.parse();
+        }
+        fail();
+    }
+
+    @Test
+    public void testEscapedReservedIdentifier() throws IOException {
         ProgramNode<?> p = null;
-        try(BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+        final String name = "com/github/tasogare/json/ds/parser/resources/testEscapedReservedIdentifier.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
             final TokenStream ts = new TokenStream(new Source(r));
             final Parser parser = new Parser(ts, name);
             p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
+        }
+        System.out.println(p);
+    }
+
+    @Test
+    public void testIncludePragma() throws IOException {
+        ProgramNode<?> p = null;
+        final String name = "com/github/tasogare/json/ds/parser/resources/testIncludePragma.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
+        }
+        final PragmaNode includePragma = p.getPragmas().get(1);
+        assertThat(includePragma.getName(), equalTo("include"));
+        final StringLiteralNode strLite = includePragma.<StringLiteralNode>getPragmaItems().get(0);
+        assertThat(strLite.getString(), equalTo("./testComments.jsds"));
+    }
+
+    @Test
+    public void testInlineDef() throws IOException {
+        ProgramNode<?> p = null;
+        final String name = "com/github/tasogare/json/ds/parser/resources/testInlineDef.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
+        }
+        System.out.println(p);
+    }
+
+    @Test
+    public void testRecordType() throws IOException {
+        ProgramNode<?> p = null;
+        final String name = "com/github/tasogare/json/ds/parser/resources/testRecordType.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final Source input = new Source(r);
+            final TokenStream ts = new TokenStream(input);
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
+        }
+        System.out.println(p);
+    }
+
+    @Test
+    public void testSourceLocation() throws IOException {
+        final String name = "com/github/tasogare/json/ds/parser/resources/testSourceLocation.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            final SourceInfo info = e.getSourceInfo();
+            assertThat(info.getRow(), is(4));
+            assertThat(info.getColumn(), is(21));
+            final String line = info.getSource().renge(info.getLineStart(), info.getPosition());
+            assertThat(line, equalTo("/* aaa */type T =   ;"));
+        }
+    }
+
+    /**
+     * 末尾カンマとラインターミネータを正しく処理してなかった。
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testTrailingCommaAndLineTerminator() throws IOException {
+        ProgramNode<?> p = null;
+        try {
+            final TokenStream ts = new TokenStream(new Source("type T=[number,\r\n];"));
+            final Parser parser = new Parser(ts, "raw string");
+            p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
+        }
+        System.out.println(p);
+    }
+
+    @Test
+    public void testUnionType() throws IOException {
+        ProgramNode<?> p = null;
+        final String name = "com/github/tasogare/json/ds/parser/resources/testUnionType.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final Source input = new Source(r);
+            final TokenStream ts = new TokenStream(input);
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
+        }
+        System.out.println(p);
+    }
+
+    @Test
+    public void testUsePragmaWithMultiItem() throws IOException {
+        ProgramNode<?> p = null;
+        final String name = "com/github/tasogare/json/ds/parser/resources/testUsePragmaWithMultiItem.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
+        }
+        final List<IdentifierNode> pragmaItems = p.getPragmas().get(0).getPragmaItems();
+        assertThat(pragmaItems.get(0).getString(), equalTo("aaa"));
+        assertThat(pragmaItems.get(1).getString(), equalTo("bbb"));
+        assertThat(pragmaItems.get(2).getString(), equalTo("ccc"));
+    }
+
+    @Test
+    public void testUseStandard() throws IOException {
+        ProgramNode<?> p = null;
+        final String name = "com/github/tasogare/json/ds/parser/resources/testUseStandard.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
+        }
+        final IdentifierNode in = p.getPragmas().get(0).<IdentifierNode>getPragmaItems().get(0);
+        assertThat(in, instanceOf(ContextuallyReservedIdentifierNode.class));
+        assertTrue(((ContextuallyReservedIdentifierNode)in).isStandard());
+    }
+
+    @Test
+    public void testUseStrict() throws IOException {
+        ProgramNode<?> p = null;
+        final String name = "com/github/tasogare/json/ds/parser/resources/testUseStrict.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
+        }
+        final IdentifierNode in = p.getPragmas().get(0).<IdentifierNode>getPragmaItems().get(0);
+        assertThat(in, instanceOf(ContextuallyReservedIdentifierNode.class));
+        assertTrue(((ContextuallyReservedIdentifierNode)in).isStrict());
+    }
+
+    @Test
+    public void testVariableArrayType() throws IOException {
+        ProgramNode<?> p = null;
+        final String name = "com/github/tasogare/json/ds/parser/resources/testVariableArrayType.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
+        }
+        System.out.println(p);
+    }
+    @Test
+    public void testWithComment() throws IOException {
+        ProgramNode<?> p = null;
+        final String name = "com/github/tasogare/json/ds/parser/resources/testWithComment.jsds";
+        try(BufferedReader r = newReader(name, getClass())){
+            final TokenStream ts = new TokenStream(new Source(r));
+            final Parser parser = new Parser(ts, name);
+            p = parser.parse();
+        } catch(ParserException e){
+            reportError(e);
+            fail();
         }
         System.out.println(p);
     }

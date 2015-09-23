@@ -6,6 +6,7 @@ package com.github.tasogare.json.ds.datatype;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static com.github.tasogare.json.ds.tests.AllTest.newReader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,11 +50,10 @@ public class JsonDsProcessorTest {
 
     @Test
     public void test() throws IOException, JsonDsException {
-        String name = "com/github/tasogare/json/ds/datatype/resources/layer/layer.js";
-        URL url = getClass().getClassLoader().getResource(name);
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+        final String name = "com/github/tasogare/json/ds/datatype/resources/layer/layer.jsds";
+        try (final BufferedReader r = newReader(name, getClass())) {
             final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
-            processor.process(r, url);
+            processor.process(r, getClass().getClassLoader().getResource(name));
             final Type json = processor.getMetaObjects().getMetaObject("JSON");
             System.out.println(json);
         }
@@ -64,9 +64,9 @@ public class JsonDsProcessorTest {
         final String source = "use standard; type JSON = [number, string, boolean, ...number]";
         final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
         processor.process(source, null);
+
         final String name = "com/github/tasogare/json/ds/datatype/resources/mixed.json";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+        try (final BufferedReader r = newReader(name, getClass())) {
             final JsonStructure json = Json.createReader(r).read();
             final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
             final Type jsonType = typeSystem.getMetaObject("JSON");
@@ -80,8 +80,9 @@ public class JsonDsProcessorTest {
         final String source = "use standard; type JSON = [...*!]";
         final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
         processor.process(source, null);
-        try (final BufferedReader r = new BufferedReader(new StringReader("[null]"))) {
-            final JsonStructure json = Json.createReader(r).read();
+
+        try (final JsonReader r = Json.createReader(new BufferedReader(new StringReader("[null]")))) {
+            final JsonStructure json = r.read();
             final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
             final Type jsonType = typeSystem.getMetaObject("JSON");
 
@@ -96,32 +97,12 @@ public class JsonDsProcessorTest {
         processor.process(source, null);
 
         final String name = "com/github/tasogare/json/ds/datatype/resources/Person.json";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try(final BufferedReader r2 = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+        try(final JsonReader r = Json.createReader(newReader(name, getClass()))){
+            final JsonStructure json = r.read();
             final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
-
             final Type jsonType = typeSystem.getMetaObject("JSON");
-            final JsonStructure json = Json.createReader(r2).read();
 
             assertFalse(typeSystem.is(json, jsonType));
-        }
-    }
-
-    @Test
-    public void testValid() throws IOException, JsonDsException {
-        final String source = "use standard; type JSON = {\"first\": string?, \"last\": string, \"age\": number}";
-        final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
-        processor.process(source, null);
-
-        final String name = "com/github/tasogare/json/ds/datatype/resources/Person.json";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try(final BufferedReader r2 = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
-
-            final Type jsonType = typeSystem.getMetaObject("JSON");
-            final JsonStructure json = Json.createReader(r2).read();
-
-            assertTrue(typeSystem.is(json, jsonType));
         }
     }
 
@@ -129,55 +110,69 @@ public class JsonDsProcessorTest {
     public void testLayerForLayerWithColor() throws IOException, JsonDsException {
         final long old = System.nanoTime();
 
-        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.js";
+        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.jsds";
         final URL url = getClass().getClassLoader().getResource(jsdsFile);
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader r = newReader(url)) {
             final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
             processor.process(r, url);
 
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
             final String jsonFile = "com/github/tasogare/json/ds/datatype/resources/layer/LayerForLayerWithColor.json";
-            final InputStream is2 = getClass().getClassLoader().getResourceAsStream(jsonFile);
-            try (final JsonReader jsonReader = Json.createReader(new InputStreamReader(is2, StandardCharsets.UTF_8))) {
+            try (final JsonReader jsonReader = Json.createReader(newReader(jsonFile, getClass()))) {
                 final JsonStructure json = jsonReader.read();
+                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
                 final Type jsonType = typeSystem.getMetaObject("JSON");
 
                 assertTrue(typeSystem.is(json, jsonType));
             }
-            System.out.println("LayerForLayerWithColor: " + (System.nanoTime() - old) + " ns");
         }
+
+        System.out.println("LayerForLayerWithColor: " + (System.nanoTime() - old) + " ns");
+    }
+
+    @Test
+    public void testLayerIncluded()  throws IOException, JsonDsException {
+        final long old = System.nanoTime();
+
+        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/include/layerSplit.jsds";
+        final URL url = getClass().getClassLoader().getResource(jsdsFile);
+        try (final BufferedReader r = newReader(url)) {
+            final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
+            processor.process(r, url);
+        }
+
+        System.out.println("Layer + including test: " + (System.nanoTime() - old) + " ns");
     }
 
     @Test
     public void testLayerWithLinearGradient()  throws IOException, JsonDsException {
         final long old = System.nanoTime();
 
-        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.js";
+        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.jsds";
         final URL url = getClass().getClassLoader().getResource(jsdsFile);
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+        try (final BufferedReader r = newReader(url)) {
             final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
             processor.process(r, url);
 
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
             final String jsonFile = "com/github/tasogare/json/ds/datatype/resources/layer/LayerWithLinearGradient.json";
-            final InputStream is2 = getClass().getClassLoader().getResourceAsStream(jsonFile);
-            try (final JsonReader jsonReader = Json.createReader(new InputStreamReader(is2, StandardCharsets.UTF_8))) {
+            try (final JsonReader jsonReader = Json.createReader(newReader(jsonFile, getClass()))) {
                 final JsonStructure json = jsonReader.read();
+                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
                 final Type jsonType = typeSystem.getMetaObject("JSON");
 
                 assertTrue(typeSystem.is(json, jsonType));
             }
-            System.out.println("LayerWithLinearGradient: " + (System.nanoTime() - old) + " ns");
         }
+
+        System.out.println("LayerWithLinearGradient: " + (System.nanoTime() - old) + " ns");
     }
 
     @Test
     public void testLayerWithRadialGradient()  throws IOException, JsonDsException {
         final long old = System.nanoTime();
 
-        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.js";
+        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.jsds";
         final URL url = getClass().getClassLoader().getResource(jsdsFile);
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+        try (final BufferedReader r = newReader(url)) {
             final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
             processor.process(r, url);
 
@@ -194,17 +189,19 @@ public class JsonDsProcessorTest {
         }
     }
 
-
     @Test
-    public void testLayerIncluded()  throws IOException, JsonDsException {
-        final long old = System.nanoTime();
+    public void testValid() throws IOException, JsonDsException {
+        final String source = "use standard; type JSON = {\"first\": string?, \"last\": string, \"age\": number}";
+        final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
+        processor.process(source, null);
 
-        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/include/layerSplit.jsds";
-        final URL url = getClass().getClassLoader().getResource(jsdsFile);
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
-            final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
-            processor.process(r, url);
+        final String name = "com/github/tasogare/json/ds/datatype/resources/Person.json";
+        try(final JsonReader r = Json.createReader(newReader(name, getClass()))){
+            final JsonStructure json = r.read();
+            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
+            final Type jsonType = typeSystem.getMetaObject("JSON");
+
+            assertTrue(typeSystem.is(json, jsonType));
         }
-        System.out.println("Layer + including test: " + (System.nanoTime() - old) + " ns");
     }
 }

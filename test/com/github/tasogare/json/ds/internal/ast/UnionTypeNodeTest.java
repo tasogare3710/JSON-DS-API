@@ -4,6 +4,7 @@
 
 package com.github.tasogare.json.ds.internal.ast;
 
+import static com.github.tasogare.json.ds.internal.ast.AstContext.newTypeName;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -20,12 +21,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import com.github.tasogare.json.ds.internal.ast.IdentifierNode;
-import com.github.tasogare.json.ds.internal.ast.NameExpressionNode;
-import com.github.tasogare.json.ds.internal.ast.TypeExpressionNode;
-import com.github.tasogare.json.ds.internal.ast.TypeNameNode;
-import com.github.tasogare.json.ds.internal.ast.UnionTypeNode;
 
 public class UnionTypeNodeTest {
 
@@ -49,8 +44,8 @@ public class UnionTypeNodeTest {
     public void testUnionType() {
         // "type U = (A | B);"
         final List<TypeExpressionNode<TypeNameNode>> list= new ArrayList<>();
-        list.add(new TypeExpressionNode<TypeNameNode>(10, 11, new TypeNameNode(10, 11, new NameExpressionNode(10, 11, new IdentifierNode(10, 11, "A")))));
-        list.add(new TypeExpressionNode<TypeNameNode>(14, 15, new TypeNameNode(14, 15, new NameExpressionNode(14, 15, new IdentifierNode(14, 15, "B")))));
+        list.add(new TypeExpressionNode<TypeNameNode>(10, 11, newTypeName(10, 11, "A")));
+        list.add(new TypeExpressionNode<TypeNameNode>(14, 15, newTypeName(14, 15, "B")));
         final UnionTypeNode<TypeNameNode> unionType = new UnionTypeNode<>(9, 16, list);
 
         assertFalse(unionType.isEmpty());

@@ -4,6 +4,8 @@
 
 package com.github.tasogare.json.ds.internal.ast;
 
+import static com.github.tasogare.json.ds.internal.ast.AstContext.newFieldType;
+import static com.github.tasogare.json.ds.internal.ast.AstContext.newTypeName;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -18,15 +20,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.github.tasogare.json.ds.internal.ast.FieldTypeNode;
-import com.github.tasogare.json.ds.internal.ast.IdentifierNode;
-import com.github.tasogare.json.ds.internal.ast.NameExpressionNode;
-import com.github.tasogare.json.ds.internal.ast.RecordTypeNode;
-import com.github.tasogare.json.ds.internal.ast.StringLiteralNode;
-import com.github.tasogare.json.ds.internal.ast.TypeExpressionNode;
-import com.github.tasogare.json.ds.internal.ast.TypeNameNode;
-import com.github.tasogare.json.ds.internal.ast.synthetic.FieldNameNode;
-
+/**
+ * @author tasogare
+ *
+ */
 public class RecordTypeNodeTest {
 
     @BeforeClass
@@ -50,14 +47,9 @@ public class RecordTypeNodeTest {
         //"type R = { "a": number, "b": string };"
         final List<FieldTypeNode<TypeNameNode>> list= new ArrayList<>();
 
-        final FieldNameNode.StringLiteral a = new FieldNameNode.StringLiteral(11, 14, new StringLiteralNode(11, 14, "a"));
-        final TypeExpressionNode<TypeNameNode> av = new TypeExpressionNode<>(16, 22, new TypeNameNode(16, 22, new NameExpressionNode(16, 22, new IdentifierNode(16, 22, "number"))));
+        list.add(newFieldType(11, 22, 11, 14, "a", new TypeExpressionNode<>(16, 22, newTypeName(16, 22, "number"))));
+        list.add(newFieldType(24, 35, 24, 27, "b", new TypeExpressionNode<>(29, 35, newTypeName(29, 35, "string"))));
 
-        final FieldNameNode.StringLiteral b = new FieldNameNode.StringLiteral(24, 27, new StringLiteralNode(24, 27, "b"));
-        final TypeExpressionNode<TypeNameNode> bv = new TypeExpressionNode<>(29, 35, new TypeNameNode(29, 35, new NameExpressionNode(29, 35, new IdentifierNode(29, 35, "string"))));
-
-        list.add(new FieldTypeNode<TypeNameNode>(11, 22, a, av));
-        list.add(new FieldTypeNode<TypeNameNode>(24, 35, b, bv));
         final RecordTypeNode<TypeNameNode> r = new RecordTypeNode<>(9, 37, list);
 
         final List<FieldTypeNode<TypeNameNode>> fieldTypeList = r.getFieldTypeList();

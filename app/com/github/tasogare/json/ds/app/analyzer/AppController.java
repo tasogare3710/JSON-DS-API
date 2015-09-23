@@ -69,7 +69,7 @@ public class AppController {
     private void handleAnalyzeButton(final ActionEvent evt){
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(jsdsChooserTitle.from(resources));
-        fileChooser.getExtensionFilters().addAll(new ExtensionFilter(jsdsChooserExtFilterJsdsDesc.from(resources), "*.js", "*.jsds", "*.es4"),
+        fileChooser.getExtensionFilters().addAll(new ExtensionFilter(jsdsChooserExtFilterJsdsDesc.from(resources), "*.jsds"),
                                                  new ExtensionFilter(jsdsChooserExtFilterAllDesc.from(resources), "*.*"));
         final File selectedFile = fileChooser.showOpenDialog(treeView.getScene().getWindow());
         getModel().setJson(null);

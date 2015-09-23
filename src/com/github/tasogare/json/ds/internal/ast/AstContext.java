@@ -16,6 +16,16 @@ public class AstContext {
         return new TypeNameNode(start, end, new NameExpressionNode(start, end, new IdentifierNode(start, end, identifier)));
     }
 
+    /**
+     * 
+     * @param startFt start position of FieldType node
+     * @param endFt end position of FieldType node
+     * @param startFn start position of FieldName node
+     * @param endFn end position of FieldName node
+     * @param label label of field
+     * @param te TypeExpression node
+     * @return
+     */
     public static <T extends AstNode & BasicTypeExpressionNode<T>> FieldTypeNode<T> newFieldType(int startFt, int endFt,
             int startFn, int endFn, String label, TypeExpressionNode<T> te)
     {

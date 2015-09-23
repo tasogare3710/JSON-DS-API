@@ -67,9 +67,8 @@ public class ArrayTypeNodeTest {
     public void testArrayType(){
         //"type A = [number, string];"
         final List<TypeExpressionNode<TypeNameNode>> list = new ArrayList<>();
-        // Identifierを渡してTypeNameをnewするファクトリがほしい
-        list.add(new TypeExpressionNode<>(10, 16, new TypeNameNode(10, 16, new NameExpressionNode(10, 16, new IdentifierNode(10, 16, "number")))));
-        list.add(new TypeExpressionNode<>(18, 24, new TypeNameNode(18,  24, new NameExpressionNode(18,  24, new IdentifierNode(18,  24, "string")))));
+        list.add(new TypeExpressionNode<>(10, 16, AstContext.newTypeName(10, 16, "number")));
+        list.add(new TypeExpressionNode<>(18, 24, AstContext.newTypeName(18, 24, "string")));
         final ArrayTypeNode<TypeNameNode> arrayType = new ArrayTypeNode<>(9, 25, list);
         assertTrue(arrayType.hasElementTypeList());
         assertFalse(arrayType.isEmpty());

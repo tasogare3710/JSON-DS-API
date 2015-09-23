@@ -6,11 +6,9 @@ package com.github.tasogare.json.ds.datatype;
 
 import static org.junit.Assert.*;
 import static com.github.tasogare.json.ds.datatype.Intrinsics.*;
+import static com.github.tasogare.json.ds.tests.AllTest.newReader;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -54,11 +52,9 @@ public class JsonMetaObjectTest {
     public void test1() throws IOException {
         final JsonMetaObjectTestDriver metaObject = new JsonMetaObjectTestDriver();
         final String name = "com/github/tasogare/json/ds/datatype/resources/test1.json";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try(final InputStreamReader r = new InputStreamReader(is, StandardCharsets.UTF_8)){
-            final JsonReader json = Json.createReader(r);
+        try(final JsonReader json = Json.createReader(newReader(name, getClass()))){
             final JsonStructure value = json.read();
-            ArrayType test = new ArrayType(stringType);
+            final ArrayType test = new ArrayType(stringType);
             assertTrue(metaObject.is(value, test));
             assertTrue(metaObject.is(value, anyType));
             assertTrue(metaObject.is(value, new ArrayType(anyType)));
@@ -75,11 +71,9 @@ public class JsonMetaObjectTest {
     public void test2() throws IOException {
         final JsonMetaObjectTestDriver metaObject = new JsonMetaObjectTestDriver();
         final String name = "com/github/tasogare/json/ds/datatype/resources/test1.json";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try(final InputStreamReader r = new InputStreamReader(is, StandardCharsets.UTF_8)){
-            final JsonReader json = Json.createReader(r);
+        try(final JsonReader json = Json.createReader(newReader(name, getClass()))){
             final JsonStructure value = json.read();
-            ArrayType test = new ArrayType(Arrays.asList(stringType, stringType, stringType));
+            final ArrayType test = new ArrayType(Arrays.asList(stringType, stringType, stringType));
             assertTrue(metaObject.is(value, test));
             assertTrue(metaObject.is(value, anyType));
             assertTrue(metaObject.is(value, new ArrayType(anyType)));
@@ -90,11 +84,9 @@ public class JsonMetaObjectTest {
     public void test3() throws IOException {
         final JsonMetaObjectTestDriver metaObject = new JsonMetaObjectTestDriver();
         final String name = "com/github/tasogare/json/ds/datatype/resources/mixed.json";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try(final InputStreamReader r = new InputStreamReader(is, StandardCharsets.UTF_8)){
-            final JsonReader json = Json.createReader(r);
+        try(final JsonReader json = Json.createReader(newReader(name, getClass()))){
             final JsonStructure value = json.read();
-            ArrayType test = new ArrayType(Arrays.asList(numberType, stringType, booleanType), numberType);
+            final ArrayType test = new ArrayType(Arrays.asList(numberType, stringType, booleanType), numberType);
             assertTrue(metaObject.is(value, test));
             assertTrue(metaObject.is(value, anyType));
             assertTrue(metaObject.is(value, new ArrayType(anyType)));
@@ -109,11 +101,9 @@ public class JsonMetaObjectTest {
     public void test4() throws IOException {
         final JsonMetaObjectTestDriver metaObject = new JsonMetaObjectTestDriver();
         final String name = "com/github/tasogare/json/ds/datatype/resources/mixed.json";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try(final InputStreamReader r = new InputStreamReader(is, StandardCharsets.UTF_8)){
-            final JsonReader json = Json.createReader(r);
+        try(final JsonReader json = Json.createReader(newReader(name, getClass()))){
             final JsonStructure value = json.read();
-            ArrayType test = new ArrayType(anyType);
+            final ArrayType test = new ArrayType(anyType);
             assertTrue(metaObject.is(value, test));
             assertTrue(metaObject.is(value, anyType));
         }
@@ -137,9 +127,7 @@ public class JsonMetaObjectTest {
 
         final JsonMetaObjectTestDriver metaObject = new JsonMetaObjectTestDriver();
         final String name = "com/github/tasogare/json/ds/datatype/resources/UnionTypedJsonInArray.json";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try(final InputStreamReader r = new InputStreamReader(is, StandardCharsets.UTF_8)){
-            final JsonReader json = Json.createReader(r);
+        try(final JsonReader json = Json.createReader(newReader(name, getClass()))){
             final JsonStructure value = json.read();
             assertTrue(metaObject.is(value, test));
             assertTrue(metaObject.is(value, anyType));
@@ -165,9 +153,7 @@ public class JsonMetaObjectTest {
 
         final JsonMetaObjectTestDriver metaObject = new JsonMetaObjectTestDriver();
         final String name = "com/github/tasogare/json/ds/datatype/resources/UnionTypedJsonInObject.json";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try(final InputStreamReader r = new InputStreamReader(is, StandardCharsets.UTF_8)){
-            final JsonReader json = Json.createReader(r);
+        try(final JsonReader json = Json.createReader(newReader(name, getClass()))){
             final JsonStructure value = json.read();
             assertTrue(metaObject.is(value, test));
             assertTrue(metaObject.is(value, anyType));

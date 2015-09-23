@@ -6,13 +6,11 @@ package com.github.tasogare.json.ds.datatype;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static com.github.tasogare.json.ds.tests.AllTest.newReader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
 import javax.json.Json;
 import javax.json.JsonReader;
@@ -48,9 +46,9 @@ public class JsonDsProcessorHoistableTest {
 
     @Test
     public void test() throws IOException, JsonDsException {
-        final String name = "com/github/tasogare/json/ds/datatype/resources/layer/layerHoisted.js";
+        final String name = "com/github/tasogare/json/ds/datatype/resources/layer/layerHoisted.jsds";
         final URL url = getClass().getClassLoader().getResource(name);
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader r = newReader(url)) {
             final JsonDsProcessorHoistableTestDriver processor = new JsonDsProcessorHoistableTestDriver();
             processor.process(r, url);
             final Type jsonType = processor.getMetaObjects().getMetaObject("JSON");
@@ -65,12 +63,10 @@ public class JsonDsProcessorHoistableTest {
         processor.process(source, null);
 
         final String name = "com/github/tasogare/json/ds/datatype/resources/mixed.json";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try(final BufferedReader r2 = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+        try(final JsonReader r = Json.createReader(newReader(name, getClass()))){
+            final JsonStructure json = r.read();
             final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
-
             final Type jsonType = typeSystem.getMetaObject("JSON");
-            final JsonStructure json = Json.createReader(r2).read();
 
             assertTrue(typeSystem.is(json, jsonType));
         }
@@ -83,12 +79,10 @@ public class JsonDsProcessorHoistableTest {
         processor.process(source, null);
 
         final String name = "com/github/tasogare/json/ds/datatype/resources/Person.json";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try(final BufferedReader r2 = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+        try(final JsonReader r = Json.createReader(newReader(name, getClass()))){
+            final JsonStructure json = r.read();
             final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
-
             final Type jsonType = typeSystem.getMetaObject("JSON");
-            final JsonStructure json = Json.createReader(r2).read();
 
             assertFalse(typeSystem.is(json, jsonType));
         }
@@ -101,12 +95,10 @@ public class JsonDsProcessorHoistableTest {
         processor.process(source, null);
 
         final String name = "com/github/tasogare/json/ds/datatype/resources/Person.json";
-        final InputStream is = getClass().getClassLoader().getResourceAsStream(name);
-        try(final BufferedReader r2 = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))){
+        try(final JsonReader r = Json.createReader(newReader(name, getClass()))){
+            final JsonStructure json = r.read();
             final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
-
             final Type jsonType = typeSystem.getMetaObject("JSON");
-            final JsonStructure json = Json.createReader(r2).read();
 
             assertTrue(typeSystem.is(json, jsonType));
         }
@@ -116,22 +108,22 @@ public class JsonDsProcessorHoistableTest {
     public void testLayerForLayerWithColor() throws IOException, JsonDsException {
         final long old = System.nanoTime();
 
-        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.js";
+        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.jsds";
         final URL url = getClass().getClassLoader().getResource(jsdsFile);
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+        try (final BufferedReader r = newReader(url)) {
             final JsonDsProcessorHoistableTestDriver processor = new JsonDsProcessorHoistableTestDriver();
             processor.process(r, url);
 
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
             final String jsonFile = "com/github/tasogare/json/ds/datatype/resources/layer/LayerForLayerWithColor.json";
-            final InputStream is2 = getClass().getClassLoader().getResourceAsStream(jsonFile);
-            try (final JsonReader jsonReader = Json.createReader(new InputStreamReader(is2, StandardCharsets.UTF_8))) {
-                final JsonStructure json = jsonReader.read();
+            try (final JsonReader r2 = Json.createReader(newReader(jsonFile, getClass()))) {
+                final JsonStructure json = r2.read();
+                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
                 final Type jsonType = typeSystem.getMetaObject("JSON");
 
                 assertTrue(typeSystem.is(json, jsonType));
             }
         }
+
         System.out.println("LayerForLayerWithColor: " + (System.nanoTime() - old) + " ns");
     }
 
@@ -139,22 +131,22 @@ public class JsonDsProcessorHoistableTest {
     public void testLayerWithLinearGradient() throws IOException, JsonDsException {
         final long old = System.nanoTime();
 
-        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.js";
+        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.jsds";
         final URL url = getClass().getClassLoader().getResource(jsdsFile);
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+        try (final BufferedReader r = newReader(url)) {
             final JsonDsProcessorHoistableTestDriver processor = new JsonDsProcessorHoistableTestDriver();
             processor.process(r, url);
 
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
             final String jsonFile = "com/github/tasogare/json/ds/datatype/resources/layer/LayerWithLinearGradient.json";
-            final InputStream is2 = getClass().getClassLoader().getResourceAsStream(jsonFile);
-            try (final JsonReader jsonReader = Json.createReader(new InputStreamReader(is2, StandardCharsets.UTF_8))) {
-                final JsonStructure json = jsonReader.read();
+            try (final JsonReader r2 = Json.createReader(newReader(jsonFile, getClass()))) {
+                final JsonStructure json = r2.read();
+                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
                 final Type jsonType = typeSystem.getMetaObject("JSON");
 
                 assertTrue(typeSystem.is(json, jsonType));
             }
         }
+
         System.out.println("LayerWithLinearGradient: " + (System.nanoTime() - old) + " ns");
     }
 
@@ -162,22 +154,22 @@ public class JsonDsProcessorHoistableTest {
     public void testLayerWithRadialGradient() throws IOException, JsonDsException {
         final long old = System.nanoTime();
 
-        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.js";
+        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.jsds";
         final URL url = getClass().getClassLoader().getResource(jsdsFile);
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+        try (final BufferedReader r = newReader(url)) {
             final JsonDsProcessorHoistableTestDriver processor = new JsonDsProcessorHoistableTestDriver();
             processor.process(r, url);
 
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
             final String jsonFile = "com/github/tasogare/json/ds/datatype/resources/layer/LayerWithRadialGradient.json";
-            final InputStream is2 = getClass().getClassLoader().getResourceAsStream(jsonFile);
-            try (final JsonReader jsonReader = Json.createReader(new InputStreamReader(is2, StandardCharsets.UTF_8))) {
-                final JsonStructure json = jsonReader.read();
+            try (final JsonReader r2 = Json.createReader(newReader(jsonFile, getClass()))) {
+                final JsonStructure json = r2.read();
+                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
                 final Type jsonType = typeSystem.getMetaObject("JSON");
 
                 assertTrue(typeSystem.is(json, jsonType));
             }
         }
+
         System.out.println("LayerWithRadialGradient: " + (System.nanoTime() - old) + " ns");
     }
 
@@ -185,22 +177,22 @@ public class JsonDsProcessorHoistableTest {
     public void testLayerForLayerWithColorHoisted() throws IOException, JsonDsException {
         final long old = System.nanoTime();
 
-        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layerHoisted.js";
+        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layerHoisted.jsds";
         final URL url = getClass().getClassLoader().getResource(jsdsFile);
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+        try (final BufferedReader r = newReader(url)) {
             final JsonDsProcessorHoistableTestDriver processor = new JsonDsProcessorHoistableTestDriver();
             processor.process(r, url);
 
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
             final String jsonFile = "com/github/tasogare/json/ds/datatype/resources/layer/LayerForLayerWithColor.json";
-            final InputStream is2 = getClass().getClassLoader().getResourceAsStream(jsonFile);
-            try (final JsonReader jsonReader = Json.createReader(new InputStreamReader(is2, StandardCharsets.UTF_8))) {
-                final JsonStructure json = jsonReader.read();
+            try (final JsonReader r2 = Json.createReader(newReader(jsonFile, getClass()))) {
+                final JsonStructure json = r2.read();
+                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
                 final Type jsonType = typeSystem.getMetaObject("JSON");
 
                 assertTrue(typeSystem.is(json, jsonType));
             }
         }
+
         System.out.println("LayerForLayerWithColorHoisted: " + (System.nanoTime() - old) + " ns");
     }
 
@@ -208,22 +200,22 @@ public class JsonDsProcessorHoistableTest {
     public void testLayerWithLinearGradientHoisted() throws IOException, JsonDsException {
         final long old = System.nanoTime();
 
-        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layerHoisted.js";
+        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layerHoisted.jsds";
         final URL url = getClass().getClassLoader().getResource(jsdsFile);
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+        try (final BufferedReader r = newReader(url)) {
             final JsonDsProcessorHoistableTestDriver processor = new JsonDsProcessorHoistableTestDriver();
             processor.process(r, url);
 
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
             final String jsonFile = "com/github/tasogare/json/ds/datatype/resources/layer/LayerWithLinearGradient.json";
-            final InputStream is2 = getClass().getClassLoader().getResourceAsStream(jsonFile);
-            try (final JsonReader jsonReader = Json.createReader(new InputStreamReader(is2, StandardCharsets.UTF_8))) {
-                final JsonStructure json = jsonReader.read();
+            try (final JsonReader r2 = Json.createReader(newReader(jsonFile, getClass()))) {
+                final JsonStructure json = r2.read();
+                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
                 final Type jsonType = typeSystem.getMetaObject("JSON");
 
                 assertTrue(typeSystem.is(json, jsonType));
             }
         }
+
         System.out.println("LayerWithLinearGradientHoisted: " + (System.nanoTime() - old) + " ns");
     }
 
@@ -231,22 +223,22 @@ public class JsonDsProcessorHoistableTest {
     public void testLayerWithRadialGradientHoisted() throws IOException, JsonDsException {
         final long old = System.nanoTime();
 
-        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layerHoisted.js";
+        final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layerHoisted.jsds";
         final URL url = getClass().getClassLoader().getResource(jsdsFile);
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+        try (final BufferedReader r = newReader(url)) {
             final JsonDsProcessorHoistableTestDriver processor = new JsonDsProcessorHoistableTestDriver();
             processor.process(r, url);
 
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
             final String jsonFile = "com/github/tasogare/json/ds/datatype/resources/layer/LayerWithRadialGradient.json";
-            final InputStream is2 = getClass().getClassLoader().getResourceAsStream(jsonFile);
-            try (final JsonReader jsonReader = Json.createReader(new InputStreamReader(is2, StandardCharsets.UTF_8))) {
-                final JsonStructure json = jsonReader.read();
+            try (final JsonReader r2 = Json.createReader(newReader(jsonFile, getClass()))) {
+                final JsonStructure json = r2.read();
+                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
                 final Type jsonType = typeSystem.getMetaObject("JSON");
 
                 assertTrue(typeSystem.is(json, jsonType));
             }
         }
+
         System.out.println("LayerWithRadialGradientHoisted: " + (System.nanoTime() - old) + " ns");
     }
 
@@ -256,10 +248,11 @@ public class JsonDsProcessorHoistableTest {
 
         final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/include/layerHoistedSplit.jsds";
         final URL url = getClass().getClassLoader().getResource(jsdsFile);
-        try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
+        try (final BufferedReader r = newReader(url)) {
             final JsonDsProcessorHoistableTestDriver processor = new JsonDsProcessorHoistableTestDriver();
             processor.process(r, url);
         }
+
         System.out.println("LayerHoisted + including test: " + (System.nanoTime() - old) + " ns");
     }
 

@@ -128,27 +128,71 @@ public class Parser {
         return pragma;
     }
 
+    /**
+     * @return
+     */
     protected PragmaNode parseUsePragma() {
         //@formatter:off
         // UsePragma
-        //      "use" UsePragmaItems
+        //      "use"  "standard" [ContextuallyReservedIdentifier]
+        //      "use"  "strict"   [ContextuallyReservedIdentifier]
+        //      "use"  UsePragmaItems
+        //
+        // UsePragmaItems
+        //      UsePragmaItem
+        //      UsePragmaItems  ","  UsePragmaItem
+        // 
+        // UsePragmaItem
+        //      Identifier
         //@formatter:on
-        final List<IdentifierNode> items = parseUsePragmaItems();
-        final PragmaNode pragma = new<IdentifierNode> PragmaNode(0, ts.position(), "use", items);
-        return pragma;
+        Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
+        if (t == SemiColon) {
+            throw new ParserException(
+                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+        }
+        ts.pushPendding(t);
+        
+        final List<IdentifierNode> items = new ArrayList<>();
+        int count = 0;
+        while (true) {
+            t = ts.scanTokenWithoutOf(Comment);
+            if (t == Eof) {
+                throw new ParserException(
+                    new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            }
+            // PragmaItem
+            final IdentifierNode ident = parseIdentifier();
+            // "use" "standard" [ContextuallyReservedIdentifier]
+            // "use" "strict" [ContextuallyReservedIdentifier]
+            if (ident instanceof ContextuallyReservedIdentifierNode) {
+                final ContextuallyReservedIdentifierNode crident = (ContextuallyReservedIdentifierNode) ident;
+                if (crident.isStandard() || crident.isStrict()) {
+                    // TODO: 11.6.1.1 - Static Semantics: Early Errors
+                    if (count != 0) {
+                        throw new ParserException(new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(),
+                            sourceName, ts.source()));
+                    }else{
+                        return new<ContextuallyReservedIdentifierNode> PragmaNode(0, ts.position(), "use", crident);
+                    }
+                }
+                // 今のところここで有効なContextuallyReservedIdentifierはstandardとstrictだけ
+                throw new AssertionError(ident.getString());
+            } else {
+                items.add(ident);
+            }
+
+            t = ts.scanTokenWithoutOf(Comment);
+            if (t == SemiColon || t == LineTerminator) {
+                ts.pushPendding(t);
+                break;
+            }
+            count++;
+        }
+        return new<IdentifierNode> PragmaNode(0, ts.position(), "use", items);
     }
 
-    protected List<IdentifierNode> parseUsePragmaItems() {
-        //@formatter:off
-        // PragmaItems
-        //      PragmaItem
-        //      PragmaItems , PragmaItem
-        //
-        // PragmaItem
-        //      "standard" [ContextuallyReservedIdentifier]
-        //      "strict" [ContextuallyReservedIdentifier]
-        //      Identifier (UNUSED)
-        //@formatter:on
+    @Deprecated
+    protected PragmaNode parseUsePragmaItems() {
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t == SemiColon) {
             throw new ParserException(
@@ -157,7 +201,6 @@ public class Parser {
         ts.pushPendding(t);
 
         final List<IdentifierNode> items = new ArrayList<>();
-        // XXX: PragmaItems := PragmaItems , PragmaItem は廃止されるかもしれないので実装していない
         while (true) {
             t = ts.scanTokenWithoutOf(Comment);
             if (t == Eof) {
@@ -173,7 +216,7 @@ public class Parser {
                 break;
             }
         }
-        return items;
+        return new<IdentifierNode> PragmaNode(0, ts.position(), "use", items);
     }
 
     protected PragmaNode parseIncludePragma() {

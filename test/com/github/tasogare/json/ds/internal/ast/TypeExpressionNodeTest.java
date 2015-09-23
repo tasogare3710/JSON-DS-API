@@ -4,6 +4,7 @@
 
 package com.github.tasogare.json.ds.internal.ast;
 
+import static com.github.tasogare.json.ds.internal.ast.AstContext.newTypeName;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -13,11 +14,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import com.github.tasogare.json.ds.internal.ast.IdentifierNode;
-import com.github.tasogare.json.ds.internal.ast.NameExpressionNode;
-import com.github.tasogare.json.ds.internal.ast.TypeExpressionNode;
-import com.github.tasogare.json.ds.internal.ast.TypeNameNode;
 
 public class TypeExpressionNodeTest {
 
@@ -39,7 +35,8 @@ public class TypeExpressionNodeTest {
 
     @Test
     public void test() {
-        final TypeExpressionNode<TypeNameNode> type = new TypeExpressionNode<>(15, 21, new TypeNameNode(15, 21, new NameExpressionNode(15, 21, new IdentifierNode(15, 21, "number"))), false);
+        final TypeNameNode name = newTypeName(15, 21, "number");
+        final TypeExpressionNode<TypeNameNode> type = new TypeExpressionNode<>(15, 21, name, false);
 
         assertThat(type.getNullability(), is(TypeExpressionNode.Nullability.NonNullable));
         assertThat(type.getBasicTypeExpression().getString(), equalTo("number"));

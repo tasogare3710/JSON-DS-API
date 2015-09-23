@@ -1,5 +1,5 @@
 use standard;
 include
-	"./Comments.js";
+	"./testComments.jsds";
 
 type T = string;
