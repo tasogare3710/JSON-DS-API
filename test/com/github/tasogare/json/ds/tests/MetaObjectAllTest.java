@@ -13,10 +13,6 @@ import com.github.tasogare.json.ds.datatype.JsonDsProcessorTest;
 import com.github.tasogare.json.ds.datatype.JsonMetaObjectTest;
 
 @RunWith(Suite.class)
-@SuiteClasses({
-    JsonMetaObjectTest.class,
-    JsonDsProcessorTest.class,
-    JsonDsProcessorHoistableTest.class
-})
+@SuiteClasses({JsonMetaObjectTest.class, JsonDsProcessorTest.class, JsonDsProcessorHoistableTest.class })
 public class MetaObjectAllTest {
 }

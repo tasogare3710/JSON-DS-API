@@ -7,11 +7,13 @@ package com.github.tasogare.json.ds.datatype.driver;
 import java.io.Reader;
 import java.net.URL;
 
-import com.github.tasogare.json.ds.JsonDsException;
-import com.github.tasogare.json.ds.parser.ParserException;
+import com.github.tasogare.json.ds.MetaObject;
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 
 /**
  * JSON-DS API仕様にはプロセッサが含まれないためテスト・ドライバが必要
+ * 
  * @author tasogare
  *
  */
@@ -27,22 +29,19 @@ public interface DatatypeSchemaProcessorTestDriver {
      * 
      * @param jsds
      * @param sourceName
-     * @throws ParserException
-     *             XXX: {@linkplain ParserException}は{@linkplain JsonDsException}
-     *             の原因としてラップされて扱われるように変更されるかもしれない
-     * @throws JsonDsException
+     * @throws RuntimeSemanticsException
+     * @throws StaticSemanticsException
      */
-    void process(Reader jsds, URL sourceName) throws ParserException, JsonDsException;
+    void process(Reader jsds, URL sourceName) throws RuntimeSemanticsException, StaticSemanticsException;
 
     /**
      * 
      * @param jsds
      * @param sourceName
-     * @throws ParserException
-     *             XXX: {@linkplain ParserException}は{@linkplain JsonDsException}
-     *             の原因としてラップされて扱われるように変更されるかもしれない
-     * @throws JsonDsException
+     * @throws RuntimeSemanticsException
+     * @throws StaticSemanticsException
      */
-    void process(String jsds, URL sourceName) throws ParserException, JsonDsException;
+    void process(String jsds, URL sourceName) throws RuntimeSemanticsException, StaticSemanticsException;
 
+    MetaObject<?> getMetaObjects();
 }

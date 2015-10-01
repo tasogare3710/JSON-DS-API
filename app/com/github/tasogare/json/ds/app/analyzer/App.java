@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 
 /**
  * XXX: 開発中は以下の引数を渡して実行しているが何か操作をするとどれかが悪さをしてハングアップするがどれか特定していない
+ * 
  * <pre>
  * -Djavafx.verbose=true
  * -Djavafx.debug=false
@@ -30,12 +31,14 @@ import javafx.stage.Stage;
  * -Dcom.sun.scenario.animation.adaptivepulse=true
  * -Dcom.sun.javafx.highContrastTheme=BLACKONWHITE
  * </pre>
+ * 
  * @author tasogare
  *
  */
 public class App extends Application {
 
     private final ResourceBundle RESOURCES;
+
     public App() {
         RESOURCES = ResourceBundle.getBundle(getClass().getPackage().getName() + ".resources.App");
     }

@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.synthetic.DirectiveNode;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 
@@ -15,14 +17,17 @@ public class ProgramNode<D extends AstNode & DirectiveNode<D>> extends AstNode i
 
     private final List<D> directives;
     private final List<PragmaNode> pragmas;
-    public ProgramNode(final long startPosition, final long endPosition, final List<D> directives, final List<PragmaNode> pragmas) {
+
+    public ProgramNode(final long startPosition, final long endPosition, final List<D> directives,
+        final List<PragmaNode> pragmas)
+    {
         super(startPosition, endPosition);
         this.directives = directives == null ? null : Collections.unmodifiableList(new ArrayList<D>(directives));
         this.pragmas = pragmas == null ? null : Collections.unmodifiableList(new ArrayList<PragmaNode>(pragmas));
     }
 
     @Override
-    public <R> R accept(NodeVisitor<R> visitor) {
+    public <R> R accept(NodeVisitor<R> visitor) throws RuntimeSemanticsException, StaticSemanticsException {
         return visitor.visit(this);
     }
 

@@ -15,7 +15,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.github.tasogare.json.ds.parser.Source;
-import com.github.tasogare.json.ds.parser.SourceException;
 
 public class SourceOfZeroTest {
 
@@ -62,7 +61,7 @@ public class SourceOfZeroTest {
         assertThat(source.peek(1), is(Source.EOF));
     }
 
-    @Test(expected=IndexOutOfBoundsException.class)
+    @Test(expected = IndexOutOfBoundsException.class)
     public void testZeroPeek_Int_Underrun() {
         final Source source = new Source("");
         assertThat(source.peek(-1), is(Source.EOF));
@@ -90,7 +89,7 @@ public class SourceOfZeroTest {
         assertThat(source.next(), is(Source.EOF));
     }
 
-    @Test(expected=IndexOutOfBoundsException.class)
+    @Test(expected = IndexOutOfBoundsException.class)
     public void testZeroPushback() {
         final Source source = new Source("");
         source.pushback(1);
@@ -109,7 +108,7 @@ public class SourceOfZeroTest {
     /**
      * sourceのpositionがマイナス方向にOutOfIndexのときIndexOutOfBoundsException
      */
-    @Test(expected=IndexOutOfBoundsException.class)
+    @Test(expected = IndexOutOfBoundsException.class)
     public void testZeroMatch_Int_Int2() {
         final Source source = new Source("");
         assertThat(source.match(-1, Source.EOF), is(true));
@@ -124,10 +123,11 @@ public class SourceOfZeroTest {
 
     /**
      * overrunしても{@link Source#length()}を超えていれば常に{@link Source#EOF}を返す。
+     * 
      * @see Source#peek(int)
      */
     @Test
-    public void testZeroMatchWithAdvance_Int_IntOverrun(){
+    public void testZeroMatchWithAdvance_Int_IntOverrun() {
         final Source source = new Source("");
         final int pos = source.position();
         assertThat(source.matchWithAdvance(0, Source.EOF), is(true));
@@ -136,10 +136,11 @@ public class SourceOfZeroTest {
 
     /**
      * overrunしても{@link Source#length()}を超えていれば常に{@link Source#EOF}を返す。
+     * 
      * @see Source#peek(int)
      */
     @Test
-    public void testZeroMatchWithAdvance_IntOverrun(){
+    public void testZeroMatchWithAdvance_IntOverrun() {
         final Source source = new Source("");
         final int pos = source.position();
         assertThat(source.matchWithAdvance(Source.EOF), is(true));
@@ -147,29 +148,29 @@ public class SourceOfZeroTest {
     }
 
     @Test
-    public void testZeroMustMatch_Int(){
+    public void testZeroMustMatch_Int() {
         final Source source = new Source("");
         final int pos = source.position();
         source.mustMatch(Source.EOF);
         assertThat(pos, is(source.position()));
     }
 
-    @Test(expected=SourceException.class)
-    public void testZeroMustMatch_Int_WithException(){
+    @Test(expected = IllegalStateException.class)
+    public void testZeroMustMatch_Int_WithException() {
         final Source source = new Source("");
         source.mustMatch('\u3042');
     }
 
     @Test
-    public void testZeroMustMatchWithAdvance_Int(){
+    public void testZeroMustMatchWithAdvance_Int() {
         final Source source = new Source("");
         final int pos = source.position();
         source.mustMatchWithAdvance(Source.EOF);
         assertThat(pos + 1, is(source.position()));
     }
 
-    @Test(expected=SourceException.class)
-    public void testZeroMustMatchWithAdvance_Int_WithException(){
+    @Test(expected = IllegalStateException.class)
+    public void testZeroMustMatchWithAdvance_Int_WithException() {
         final Source source = new Source("");
         source.mustMatchWithAdvance('\u3042');
     }
@@ -183,7 +184,7 @@ public class SourceOfZeroTest {
         assertThat(substr, equalTo(Empty));
     }
 
-    @Test(expected=IndexOutOfBoundsException.class)
+    @Test(expected = IndexOutOfBoundsException.class)
     public void testZeroRengeWithOutOfRenge() {
         final Source source = new Source("");
         source.renge(0, 1);

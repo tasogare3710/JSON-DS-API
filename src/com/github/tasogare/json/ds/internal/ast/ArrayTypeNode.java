@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.synthetic.BasicTypeExpressionNode;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 
@@ -15,9 +17,11 @@ import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
  * 
  * @author tasogare
  *
- * @param <T> 要素の型
+ * @param <T>
+ *            要素の型
  */
-public class ArrayTypeNode<T extends AstNode & BasicTypeExpressionNode<T>> extends AstNode implements BasicTypeExpressionNode<ArrayTypeNode<T>>, Cloneable {
+public class ArrayTypeNode<T extends AstNode & BasicTypeExpressionNode<T>> extends AstNode
+        implements BasicTypeExpressionNode<ArrayTypeNode<T>>, Cloneable {
 
     // empty ArrayTypeはvariableArrayTypeフィールドがnullで
     // elementTypeListフィールドがCollections.<TypeExpressionNode>emptyList()になる。
@@ -26,31 +30,38 @@ public class ArrayTypeNode<T extends AstNode & BasicTypeExpressionNode<T>> exten
 
     /**
      * empty ArrayTypeNode
+     * 
      * @param startPosition
      * @param endPosition
      */
     public ArrayTypeNode(final long startPosition, final long endPosition) {
-        this(startPosition, endPosition, Collections.<TypeExpressionNode<T>>emptyList(), null);
+        this(startPosition, endPosition, Collections. <TypeExpressionNode<T>> emptyList(), null);
     }
 
     /**
      * [string, string]
+     * 
      * @param startPosition
      * @param endPosition
      * @param elementTypeList
      */
-    public  ArrayTypeNode(final long startPosition, final long endPosition, final List<TypeExpressionNode<T>> elementTypeList) {
+    public ArrayTypeNode(final long startPosition, final long endPosition,
+        final List<TypeExpressionNode<T>> elementTypeList)
+    {
         this(startPosition, endPosition, elementTypeList, null);
     }
 
     /**
      * [...string]
+     * 
      * @param startPosition
      * @param endPosition
      * @param variableArrayType
      */
-    public  ArrayTypeNode(final long startPosition, final long endPosition, final TypeExpressionNode<T> variableArrayType) {
-        this(startPosition, endPosition,  null, variableArrayType);
+    public ArrayTypeNode(final long startPosition, final long endPosition,
+        final TypeExpressionNode<T> variableArrayType)
+    {
+        this(startPosition, endPosition, null, variableArrayType);
     }
 
     /**
@@ -61,10 +72,13 @@ public class ArrayTypeNode<T extends AstNode & BasicTypeExpressionNode<T>> exten
      * @param elementTypeList
      * @param variableArrayType
      */
-    public ArrayTypeNode(final long startPosition, final long endPosition, final List<TypeExpressionNode<T>> elementTypeList, final TypeExpressionNode<T> variableArrayType) {
+    public ArrayTypeNode(final long startPosition, final long endPosition,
+        final List<TypeExpressionNode<T>> elementTypeList, final TypeExpressionNode<T> variableArrayType)
+    {
         super(startPosition, endPosition);
         // 不変としてコピーする
-        this.elementTypeList = elementTypeList == null ? null : Collections.unmodifiableList(new ArrayList<TypeExpressionNode<T>>(elementTypeList));
+        this.elementTypeList = elementTypeList == null ? null
+            : Collections.unmodifiableList(new ArrayList<TypeExpressionNode<T>>(elementTypeList));
         this.variableArrayType = variableArrayType;
     }
 
@@ -87,18 +101,18 @@ public class ArrayTypeNode<T extends AstNode & BasicTypeExpressionNode<T>> exten
     }
 
     /**
-     *  
+     * 
      * @return if {@code true} is empty array type.
      */
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return variableArrayType == null && elementTypeList.isEmpty();
     }
 
     /**
      * 
-     * @return if {@code true} is contains element type and  not variable-array type.
+     * @return if {@code true} is contains element type and not variable-array type.
      */
-    public boolean hasElementTypeList(){
+    public boolean hasElementTypeList() {
         return elementTypeList != null;
     }
 
@@ -106,12 +120,12 @@ public class ArrayTypeNode<T extends AstNode & BasicTypeExpressionNode<T>> exten
      * 
      * @return if {@code true} is this array type as variable-array type, otherwise {@code false}.
      */
-    public boolean isVariable(){
+    public boolean isVariable() {
         return variableArrayType != null;
     }
 
     @Override
-    public <R> R accept(NodeVisitor<R> visitor) {
+    public <R> R accept(NodeVisitor<R> visitor) throws RuntimeSemanticsException, StaticSemanticsException {
         return visitor.visit(this);
     }
 

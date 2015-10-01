@@ -69,11 +69,11 @@ public class UnionTypeTest {
 
     @Test
     public void testEmptyElem() {
-        //type u1 = ();
+        // type u1 = ();
         final HashSet<Type> members = new HashSet<>();
         final UnionType u1 = new UnionType(members);
 
-        //type u2 = (u1 | string);
+        // type u2 = (u1 | string);
         final HashSet<Type> members2 = new HashSet<>();
         members2.add(u1);
         members2.add(stringType);
@@ -116,14 +116,14 @@ public class UnionTypeTest {
 
     @Test
     public void testObjects() {
-        //type r = {a: boolean, b: string}
+        // type r = {a: boolean, b: string}
         final HashSet<RecordType.Field> fields = new HashSet<>();
         fields.add(new RecordType.Field("a", booleanType));
         fields.add(new RecordType.Field("b", stringType));
         final RecordType r = new RecordType(fields);
 
-        //type a = [string]
-        //type u1 = (a | r);
+        // type a = [string]
+        // type u1 = (a | r);
         final HashSet<Type> members = new HashSet<>();
         final ArrayType a = new ArrayType(stringType);
         members.addAll(Arrays.asList(a, r));

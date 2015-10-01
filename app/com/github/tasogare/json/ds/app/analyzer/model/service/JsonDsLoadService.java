@@ -37,12 +37,22 @@ public class JsonDsLoadService extends Service<TreeItem<String>> {
             @Override
             protected TreeItem<String> call() throws Exception {
                 try (final BufferedReader r = new BufferedReader(new FileReader(getSchema()))) {
-                    final Source source = new Source(r);
-                    final TokenStream ts = new TokenStream(source);
-                    final Parser parser = new Parser(ts, getSchema().toURI().toString());
+                    final String name = getSchema().getAbsoluteFile().toURI().toString();
+                    final TokenStream ts = new TokenStream(new Source(r), name);
+                    updateMessage("schema loaded");
+                    updateProgress(1, 3);
+
+                    final Parser parser = new Parser(ts);
                     final ProgramNode<?> p = parser.parse();
-                    final TreeItemMaker maker = new TreeItemMaker(getSchema().getAbsoluteFile().toURI().toString());
-                    return maker.visit(p);
+                    updateMessage("end parse");
+                    updateProgress(2, 3);
+
+                    final TreeItemMaker maker = new TreeItemMaker(name);
+                    final TreeItem<String> treeRoot = maker.visit(p);
+                    updateMessage("tree created");
+                    updateProgress(3, 3);
+
+                    return treeRoot;
                 }
             }
         };

@@ -18,15 +18,7 @@ import com.github.tasogare.json.ds.datatype.StringTypeTest;
 import com.github.tasogare.json.ds.datatype.UnionTypeTest;
 
 @RunWith(Suite.class)
-@SuiteClasses({
-    AnyTypeTest.class,
-    ArrayTypeTest.class,
-    BooleanTypeTest.class,
-    NullTypeTest.class,
-    NumberTypeTest.class,
-    RecordTypeTest.class,
-    StringTypeTest.class,
-    UnionTypeTest.class
-})
+@SuiteClasses({AnyTypeTest.class, ArrayTypeTest.class, BooleanTypeTest.class, NullTypeTest.class, NumberTypeTest.class,
+    RecordTypeTest.class, StringTypeTest.class, UnionTypeTest.class })
 public class DatatypeAllTest {
 }

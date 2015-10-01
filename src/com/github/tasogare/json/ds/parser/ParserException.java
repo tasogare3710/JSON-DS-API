@@ -4,11 +4,14 @@
 
 package com.github.tasogare.json.ds.parser;
 
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+
 /**
- * 
+ * @deprecated {@link RuntimeSemanticsException}へ移行
  * @author tasogare
  *
  */
+@Deprecated
 public final class ParserException extends RuntimeException {
     private static final long serialVersionUID = 6185281711673419231L;
 

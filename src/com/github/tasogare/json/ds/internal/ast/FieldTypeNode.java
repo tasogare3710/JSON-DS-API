@@ -4,6 +4,8 @@
 
 package com.github.tasogare.json.ds.internal.ast;
 
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.synthetic.BasicTypeExpressionNode;
 import com.github.tasogare.json.ds.internal.ast.synthetic.FieldNameNode;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
@@ -13,14 +15,16 @@ public class FieldTypeNode<T extends AstNode & BasicTypeExpressionNode<T>> exten
     private final FieldNameNode name;
     private final TypeExpressionNode<T> type;
 
-    public FieldTypeNode(final long startPosition, final long endPosition, final FieldNameNode name, final TypeExpressionNode<T> type) {
+    public FieldTypeNode(final long startPosition, final long endPosition, final FieldNameNode name,
+        final TypeExpressionNode<T> type)
+    {
         super(startPosition, endPosition);
         this.name = name;
         this.type = type;
     }
 
     @Override
-    public <R> R accept(NodeVisitor<R> visitor) {
+    public <R> R accept(NodeVisitor<R> visitor) throws RuntimeSemanticsException, StaticSemanticsException {
         return visitor.visit(this);
     }
 

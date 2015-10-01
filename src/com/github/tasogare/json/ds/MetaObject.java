@@ -2,15 +2,18 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-package com.github.tasogare.json.ds.datatype;
+package com.github.tasogare.json.ds;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.tasogare.json.ds.JsonDsException;
-import com.github.tasogare.json.ds.JsonDsException.StandardErrors;
+import com.github.tasogare.json.ds.RuntimeSemanticsException.StandardErrors;
+import com.github.tasogare.json.ds.datatype.Intrinsics;
+import com.github.tasogare.json.ds.datatype.Type;
+import com.github.tasogare.json.ds.datatype.TypeException;
+import com.github.tasogare.json.ds.datatype.UndefindType;
 
 /**
  * TODO 仕様を煮詰める
@@ -42,11 +45,11 @@ public abstract class MetaObject<T> {
      * 
      * @param name
      * @param type
-     * @throws JsonDsException
+     * @throws RuntimeSemanticsException
      */
-    public final void registerMetaObject(final String name, Type type) throws JsonDsException {
+    public final void registerMetaObject(final String name, Type type) throws RuntimeSemanticsException {
         if(types.containsKey(name) && types.get(name) != Intrinsics.undefindType){
-            throw new JsonDsException("cannot change immutable binding:" + type, StandardErrors.TypeError);
+            throw new RuntimeSemanticsException("cannot change immutable binding:" + type, StandardErrors.TypeError);
         }
         types.put(name, type);
     }

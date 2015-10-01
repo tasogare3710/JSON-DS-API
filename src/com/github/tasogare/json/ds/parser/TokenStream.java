@@ -8,6 +8,8 @@ import java.io.CharArrayWriter;
 import java.util.Arrays;
 import java.util.List;
 
+import com.github.tasogare.json.ds.StaticSemanticsException;
+
 /**
  * @author tasogare
  *
@@ -15,30 +17,56 @@ import java.util.List;
 public class TokenStream {
 
     private final Source source;
+    private final String sourceName;
     private final CharArrayWriter buffer;
     private Token currentToken;
     private Token pendding;
     private int line;
     private int lineStart;
 
-    public TokenStream(final Source source) {
+    public TokenStream(final Source source, final String sourceName) {
         this.source = source;
+        this.sourceName = sourceName;
         this.buffer = new CharArrayWriter();
     }
 
-    public String asComment() {
+    public SourceInfo createCurrentSourceInfo() {
+        return new SourceInfo(row(), column(), lineStart(), position(), sourceName(), source());
+    }
+
+    /**
+     * 
+     * @return
+     * @throws IllegalStateException {@code t != currentToken}のとき
+     */
+    public String asComment() throws IllegalStateException {
         return asContentOf(Token.Comment);
     }
 
-    public String asEscapedIdentifier() {
+    /**
+     * 
+     * @return
+     * @throws IllegalStateException {@code t != currentToken}のとき
+     */
+    public String asEscapedIdentifier() throws IllegalStateException {
         return asContentOf(Token.EscapedIdentifier);
     }
 
-    public String asIdentifier() {
+    /**
+     * 
+     * @return
+     * @throws IllegalStateException {@code t != currentToken}のとき
+     */
+    public String asIdentifier() throws IllegalStateException {
         return asContentOf(Token.Identifier);
     }
 
-    public String asStringLiteral() {
+    /**
+     * 
+     * @return
+     * @throws IllegalStateException {@code t != currentToken}のとき
+     */
+    public String asStringLiteral() throws IllegalStateException {
         return asContentOf(Token.StringLiteral);
     }
 
@@ -73,6 +101,7 @@ public class TokenStream {
     }
 
     /**
+     * XXX: lineNumberの方が分かりやすいのではないか？
      * ゼロ起算の行番号を返します。
      * @return
      */
@@ -84,8 +113,9 @@ public class TokenStream {
      * この段階ではVirtual-Semicolonを挿入しない
      * 
      * @return
+     * @throws StaticSemanticsException 
      */
-    public Token scanToken() {
+    public Token scanToken() throws StaticSemanticsException {
         if(pendding != null){
             return popPendding();
         }
@@ -127,8 +157,7 @@ public class TokenStream {
             if (Source.isIdentifierStart(c)) {
                 return currentToken(readIdentifier(c, true));
             }
-            //TODO: 11.6.1.1 - Static Semantics: Early Errors
-            throw new SourceException();
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         case '/':
             // Comment ::
             //      MultiLineComment
@@ -249,16 +278,16 @@ public class TokenStream {
         if (Source.isIdentifierStart(c)) {
             return currentToken(readIdentifier(c, false));
         }
-        //TODO: 11.6.1.1 - Static Semantics: Early Errors
-        throw new SourceException();
+        throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
     }
 
     /**
      * 
      * @param ignore 無視するトークン
      * @return
+     * @throws StaticSemanticsException 
      */
-    public Token scanTokenWithoutOf(Token... ignore) {
+    public Token scanTokenWithoutOf(Token... ignore) throws StaticSemanticsException {
         final List<Token> skips = Arrays.asList(ignore);
         final boolean commentSkip = skips.contains(Token.Comment);
         final boolean identifierSkip = skips.contains(Token.Identifier);
@@ -286,13 +315,24 @@ public class TokenStream {
         return source;
     }
 
-    private String asContentOf(Token t) {
+    public String sourceName(){
+        return sourceName;
+    }
+
+    /**
+     * 
+     * @param t
+     * @return
+     * @throws IllegalStateException {@code t != currentToken}のとき
+     */
+    private String asContentOf(Token t) throws IllegalStateException {
         if (currentToken == t) {
             final String content = buffer.toString();
             buffer.reset();
             return content;
         }
-        throw new SourceException();
+        //XXX: IllegalStateExceptionでいいか？
+        throw new IllegalStateException("currentToken !=" + t.toString());
     }
 
     private Token currentToken(Token t) {
@@ -314,7 +354,7 @@ public class TokenStream {
         return tmp;
     }
 
-    private Token readIdentifier(int c, boolean hasEscape) {
+    private Token readIdentifier(int c, boolean hasEscape) throws StaticSemanticsException {
         buffer.write(c);
         while (true) {
             c = source.next();
@@ -325,8 +365,7 @@ public class TokenStream {
                 source.mustMatchWithAdvance('u');
                 c = readUnicodeEscape();
                 if (!Source.isIdentifierPart(c)) {
-                    //TODO: 11.6.1.1 - Static Semantics: Early Errors
-                    throw new SourceException();
+                    throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
                 }
                 buffer.write(c);
             } else {
@@ -343,7 +382,7 @@ public class TokenStream {
         return t;
     }
 
-    private Token readMultiLineComment() {
+    private Token readMultiLineComment() throws StaticSemanticsException {
         assert source.match(-1, '*');
         //@formatter:off
         // MultiLineComment ::
@@ -367,7 +406,7 @@ public class TokenStream {
         do {
             final int c = source.next();
             if (c == Source.EOF) {
-                throw new SourceException("EOF");
+                throw StaticSemanticsException.newSyntaxError("EOF", createCurrentSourceInfo());
             }
             // LineTerminatorSequence ::
             // <LF>
@@ -443,9 +482,9 @@ public class TokenStream {
      * You can obtain one at http://mozilla.org/MPL/2.0/.
      * 
      * @return
-     * @throws SourceException
+     * @throws StaticSemanticsException 
      */
-    private Token readStringLiteral() throws SourceException {
+    private Token readStringLiteral() throws StaticSemanticsException {
         assert source.match(-1, '"');
         /*
          * Optimization: if the source contains no escaped characters, create
@@ -455,7 +494,8 @@ public class TokenStream {
         while (source.position() < source.length()) {
             int c = source.next();
             if (c <= '\u001F') {
-                throw new SourceException("String contains control character");
+                throw StaticSemanticsException.newSyntaxError("String contains control character",
+                                                              createCurrentSourceInfo());
             } else if (c == '\\') {
                 break;
             } else if (c == '"') {
@@ -473,7 +513,7 @@ public class TokenStream {
             assert source.match(-1, '\\');
             buffer.append(source.renge(stringStart, source.position() - 1));
             if (source.position() >= source.length()) {
-                throw new SourceException("Unterminated string");
+                throw StaticSemanticsException.newSyntaxError("Unterminated string", createCurrentSourceInfo());
             }
             int c = source.next();
             switch (c) {
@@ -506,13 +546,14 @@ public class TokenStream {
                 buffer.write(code, 0, code.length);
                 break;
             default:
-                throw new SourceException("Unexpected character in string: '\\" + c + "'");
+                throw StaticSemanticsException.newSyntaxError("Unexpected character in string: '\\" + c + "'",
+                                                              createCurrentSourceInfo());
             }
             stringStart = source.position();
             while (source.position() < source.length()) {
                 c = source.next();
                 if (c <= '\u001F') {
-                    throw new SourceException("String contains control character");
+                    throw StaticSemanticsException.newSyntaxError("String contains control character", createCurrentSourceInfo());
                 } else if (c == '\\') {
                     break;
                 } else if (c == '"') {
@@ -521,13 +562,15 @@ public class TokenStream {
                 }
             }
         }
-        throw new SourceException("Unterminated string literal");
+        throw StaticSemanticsException.newSyntaxError("Unterminated string literal", createCurrentSourceInfo());
     }
 
     /**
+     * 
      * @return
+     * @throws StaticSemanticsException 
      */
-    private int readUnicodeEscape() {
+    private int readUnicodeEscape() throws StaticSemanticsException {
         int c = source.next();
         if (c == '{') {
             int acc = 0;
@@ -549,7 +592,7 @@ public class TokenStream {
             c = (numValue(c) << 12) | (numValue(source.next()) << 8) | (numValue(source.next()) << 4) | numValue(source.next());
         }
         if (!Character.isValidCodePoint(c)) {
-            throw new SourceException();
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
         return c;
     }

@@ -4,6 +4,8 @@
 
 package com.github.tasogare.json.ds.datatype;
 
+import com.github.tasogare.json.ds.MetaObject;
+
 public class ReferenceType implements Type {
 
     private final MetaObject<?> metaObjects;

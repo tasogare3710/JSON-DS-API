@@ -44,7 +44,7 @@ public class ArrayTypeNodeTest {
 
     @Test
     public void testEmptyArrayType() {
-        //"type A = [];"
+        // "type A = [];"
         final ArrayTypeNode<?> arrayType = new ArrayTypeNode<>(9, 11);
         assertTrue(arrayType.hasElementTypeList());
         assertTrue(arrayType.isEmpty());
@@ -52,9 +52,10 @@ public class ArrayTypeNodeTest {
     }
 
     @Test
-    public void testVariableArrayType(){
-        //"type A = [...number];"
-        final ArrayTypeNode<TypeNameNode> arrayType = new ArrayTypeNode<>(9, 20, new TypeExpressionNode<TypeNameNode>(10, 19, new TypeNameNode(13, 19, new NameExpressionNode(13, 19, new IdentifierNode(13,  19, "number")))));
+    public void testVariableArrayType() {
+        // "type A = [...number];"
+        final ArrayTypeNode<TypeNameNode> arrayType = new ArrayTypeNode<>(9, 20, new TypeExpressionNode<TypeNameNode>(
+            10, 19, new TypeNameNode(13, 19, new NameExpressionNode(13, 19, new IdentifierNode(13, 19, "number")))));
         assertFalse(arrayType.hasElementTypeList());
         assertFalse(arrayType.isEmpty());
         assertTrue(arrayType.isVariable());
@@ -64,8 +65,8 @@ public class ArrayTypeNodeTest {
     }
 
     @Test
-    public void testArrayType(){
-        //"type A = [number, string];"
+    public void testArrayType() {
+        // "type A = [number, string];"
         final List<TypeExpressionNode<TypeNameNode>> list = new ArrayList<>();
         list.add(new TypeExpressionNode<>(10, 16, AstContext.newTypeName(10, 16, "number")));
         list.add(new TypeExpressionNode<>(18, 24, AstContext.newTypeName(18, 24, "string")));
@@ -76,18 +77,19 @@ public class ArrayTypeNodeTest {
 
         // 以下の問題はjavaのジェネリックスの実装に由来する問題なのでAPI側の問題ではない。
         // ListのTypeExpressionのbasicTypeExpressionの型が全て同じでない場合、
-        // List<TypeExpressionNode<? extends BasicTypeExpressionNode<?>>>と宣言するしかなくTypeExpressionのbasicTypeExpressionの型が消去されてしまう
+        // List<TypeExpressionNode<? extends
+        // BasicTypeExpressionNode<?>>>と宣言するしかなくTypeExpressionのbasicTypeExpressionの型が消去されてしまう
         // したがって、elements.get(0).getBasicTypeExpression()の戻り値の型は自分自身の型ではなくBasicTypeExpressionになる。
         final List<TypeExpressionNode<TypeNameNode>> elements = arrayType.getElementTypeList();
-//        BasicTypeExpressionNode<?> a= elements.get(0).getBasicTypeExpression();
+        // BasicTypeExpressionNode<?> a= elements.get(0).getBasicTypeExpression();
         // というわけで、a.getClass()の戻り値の型がClass<? extends BasicTypeExpressionNode>になるのでどうしてもuncheckedになる。
         // そうすると以下のようにすると? extends BasicTypeは実際の型を適応できないので失敗する
-//         TypeNameNode name = a.<TypeNameNode>as(a.getClass());
-//        TypeNameNode name = a.getBasicTypeExpression();
+        // TypeNameNode name = a.<TypeNameNode>as(a.getClass());
+        // TypeNameNode name = a.getBasicTypeExpression();
         // 以下のようにするしか無い
-//        TypeNameNode name = a.as(TypeNameNode.class);
+        // TypeNameNode name = a.as(TypeNameNode.class);
         // 静的キャストでいいなら
-//        TypeNameNode name = a.asTypeName();
+        // TypeNameNode name = a.asTypeName();
         assertThat(elements.get(0).getBasicTypeExpression().getString(), equalTo("number"));
         assertThat(elements.get(1).getBasicTypeExpression().getString(), equalTo("string"));
     }

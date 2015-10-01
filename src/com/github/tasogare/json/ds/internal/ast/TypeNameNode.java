@@ -4,6 +4,8 @@
 
 package com.github.tasogare.json.ds.internal.ast;
 
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.synthetic.BasicTypeExpressionNode;
 import com.github.tasogare.json.ds.internal.ast.synthetic.NameValue;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
@@ -11,6 +13,7 @@ import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 public class TypeNameNode extends AstNode implements BasicTypeExpressionNode<TypeNameNode>, NameValue, Cloneable {
 
     private final NameExpressionNode nameExpression;
+
     public TypeNameNode(final long startPosition, final long endPosition, final NameExpressionNode nameExpression) {
         super(startPosition, endPosition);
         this.nameExpression = nameExpression;
@@ -31,7 +34,7 @@ public class TypeNameNode extends AstNode implements BasicTypeExpressionNode<Typ
     }
 
     @Override
-    public <R> R accept(NodeVisitor<R> visitor) {
+    public <R> R accept(NodeVisitor<R> visitor) throws RuntimeSemanticsException, StaticSemanticsException {
         return visitor.visit(this);
     }
 

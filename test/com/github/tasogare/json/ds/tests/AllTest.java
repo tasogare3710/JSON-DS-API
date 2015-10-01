@@ -15,16 +15,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.github.tasogare.json.ds.parser.ParserException;
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.parser.SourceInfo;
 
 @RunWith(Suite.class)
-@SuiteClasses({
-    ParserAllTest.class,
-    AstAllTest.class,
-    DatatypeAllTest.class,
-    MetaObjectAllTest.class
-})
+@SuiteClasses({CommonTest.class, ParserAllTest.class, AstAllTest.class, DatatypeAllTest.class,
+    MetaObjectAllTest.class })
 public class AllTest {
 
     public static BufferedReader newReader(URL url) throws IOException {
@@ -36,16 +33,26 @@ public class AllTest {
         return new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
     }
 
-    public static void reportError(ParserException e) {
+    public static void reportError(StaticSemanticsException e) {
         final SourceInfo info = e.getSourceInfo();
         System.err.println(info.getSourceName());
         System.err.println("row: " + info.getRow() + " col: " + info.getColumn());
         System.err.println(info.getSource().renge(info.getLineStart(), info.getPosition()));
         final StringBuilder sb = new StringBuilder();
-        for(int i=0; i< info.getColumn() - 1; i++){
+        for (int i = 0; i < info.getColumn() - 1; i++) {
             sb.append(" ");
         }
         System.err.println(sb.append("^").toString());
+        sb.delete(0, sb.length());
+
+        sb.append(e.getErrorType().toString()).append(": ").append(e.getMessage());
+        System.err.println(sb.toString());
+        e.printStackTrace();
+    }
+
+    public static void reportError(RuntimeSemanticsException e) {
+        System.err.println(e.getErrorType());
+        System.err.println(e.getMessage());
         e.printStackTrace();
     }
 }

@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import javax.json.Json;
 import javax.json.JsonReader;
 import javax.json.JsonStructure;
+import javax.json.JsonValue;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -26,9 +27,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.github.tasogare.json.ds.JsonDsException;
+import com.github.tasogare.json.ds.MetaObject;
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.datatype.driver.JsonDsProcessorTestDriver;
-import com.github.tasogare.json.ds.datatype.driver.JsonMetaObjectTestDriver;
 
 public class JsonDsProcessorTest {
 
@@ -49,7 +51,7 @@ public class JsonDsProcessorTest {
     }
 
     @Test
-    public void test() throws IOException, JsonDsException {
+    public void test() throws IOException, RuntimeSemanticsException, StaticSemanticsException {
         final String name = "com/github/tasogare/json/ds/datatype/resources/layer/layer.jsds";
         try (final BufferedReader r = newReader(name, getClass())) {
             final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
@@ -60,7 +62,7 @@ public class JsonDsProcessorTest {
     }
 
     @Test
-    public void test2() throws IOException, JsonDsException {
+    public void test2() throws IOException, RuntimeSemanticsException, StaticSemanticsException {
         final String source = "use standard; type JSON = [number, string, boolean, ...number]";
         final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
         processor.process(source, null);
@@ -68,7 +70,7 @@ public class JsonDsProcessorTest {
         final String name = "com/github/tasogare/json/ds/datatype/resources/mixed.json";
         try (final BufferedReader r = newReader(name, getClass())) {
             final JsonStructure json = Json.createReader(r).read();
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
+            final MetaObject<JsonValue> typeSystem = processor.getMetaObjects();
             final Type jsonType = typeSystem.getMetaObject("JSON");
 
             assertTrue(typeSystem.is(json, jsonType));
@@ -76,14 +78,14 @@ public class JsonDsProcessorTest {
     }
 
     @Test
-    public void test3() throws IOException, JsonDsException {
+    public void test3() throws IOException, RuntimeSemanticsException, StaticSemanticsException {
         final String source = "use standard; type JSON = [...*!]";
         final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
         processor.process(source, null);
 
         try (final JsonReader r = Json.createReader(new BufferedReader(new StringReader("[null]")))) {
             final JsonStructure json = r.read();
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
+            final MetaObject<JsonValue> typeSystem = processor.getMetaObjects();
             final Type jsonType = typeSystem.getMetaObject("JSON");
 
             assertFalse(typeSystem.is(json, jsonType));
@@ -91,15 +93,15 @@ public class JsonDsProcessorTest {
     }
 
     @Test
-    public void testInvalid() throws IOException, JsonDsException {
+    public void testInvalid() throws IOException, RuntimeSemanticsException, StaticSemanticsException {
         final String source = "use standard; type JSON = {\"first\": string, \"last\": string, \"age\": number}";
         final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
         processor.process(source, null);
 
         final String name = "com/github/tasogare/json/ds/datatype/resources/Person.json";
-        try(final JsonReader r = Json.createReader(newReader(name, getClass()))){
+        try (final JsonReader r = Json.createReader(newReader(name, getClass()))) {
             final JsonStructure json = r.read();
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
+            final MetaObject<JsonValue> typeSystem = processor.getMetaObjects();
             final Type jsonType = typeSystem.getMetaObject("JSON");
 
             assertFalse(typeSystem.is(json, jsonType));
@@ -107,7 +109,7 @@ public class JsonDsProcessorTest {
     }
 
     @Test
-    public void testLayerForLayerWithColor() throws IOException, JsonDsException {
+    public void testLayerForLayerWithColor() throws IOException, RuntimeSemanticsException, StaticSemanticsException {
         final long old = System.nanoTime();
 
         final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.jsds";
@@ -119,7 +121,7 @@ public class JsonDsProcessorTest {
             final String jsonFile = "com/github/tasogare/json/ds/datatype/resources/layer/LayerForLayerWithColor.json";
             try (final JsonReader jsonReader = Json.createReader(newReader(jsonFile, getClass()))) {
                 final JsonStructure json = jsonReader.read();
-                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
+                final MetaObject<JsonValue> typeSystem = processor.getMetaObjects();
                 final Type jsonType = typeSystem.getMetaObject("JSON");
 
                 assertTrue(typeSystem.is(json, jsonType));
@@ -130,7 +132,7 @@ public class JsonDsProcessorTest {
     }
 
     @Test
-    public void testLayerIncluded()  throws IOException, JsonDsException {
+    public void testLayerIncluded() throws IOException, RuntimeSemanticsException, StaticSemanticsException {
         final long old = System.nanoTime();
 
         final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/include/layerSplit.jsds";
@@ -144,7 +146,7 @@ public class JsonDsProcessorTest {
     }
 
     @Test
-    public void testLayerWithLinearGradient()  throws IOException, JsonDsException {
+    public void testLayerWithLinearGradient() throws IOException, RuntimeSemanticsException, StaticSemanticsException {
         final long old = System.nanoTime();
 
         final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.jsds";
@@ -156,7 +158,7 @@ public class JsonDsProcessorTest {
             final String jsonFile = "com/github/tasogare/json/ds/datatype/resources/layer/LayerWithLinearGradient.json";
             try (final JsonReader jsonReader = Json.createReader(newReader(jsonFile, getClass()))) {
                 final JsonStructure json = jsonReader.read();
-                final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
+                final MetaObject<JsonValue> typeSystem = processor.getMetaObjects();
                 final Type jsonType = typeSystem.getMetaObject("JSON");
 
                 assertTrue(typeSystem.is(json, jsonType));
@@ -167,7 +169,7 @@ public class JsonDsProcessorTest {
     }
 
     @Test
-    public void testLayerWithRadialGradient()  throws IOException, JsonDsException {
+    public void testLayerWithRadialGradient() throws IOException, RuntimeSemanticsException, StaticSemanticsException {
         final long old = System.nanoTime();
 
         final String jsdsFile = "com/github/tasogare/json/ds/datatype/resources/layer/layer.jsds";
@@ -176,7 +178,7 @@ public class JsonDsProcessorTest {
             final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
             processor.process(r, url);
 
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
+            final MetaObject<JsonValue> typeSystem = processor.getMetaObjects();
             final String jsonFile = "com/github/tasogare/json/ds/datatype/resources/layer/LayerWithRadialGradient.json";
             final InputStream is2 = getClass().getClassLoader().getResourceAsStream(jsonFile);
             try (final JsonReader jsonReader = Json.createReader(new InputStreamReader(is2, StandardCharsets.UTF_8))) {
@@ -190,15 +192,15 @@ public class JsonDsProcessorTest {
     }
 
     @Test
-    public void testValid() throws IOException, JsonDsException {
+    public void testValid() throws IOException, RuntimeSemanticsException, StaticSemanticsException {
         final String source = "use standard; type JSON = {\"first\": string?, \"last\": string, \"age\": number}";
         final JsonDsProcessorTestDriver processor = new JsonDsProcessorTestDriver();
         processor.process(source, null);
 
         final String name = "com/github/tasogare/json/ds/datatype/resources/Person.json";
-        try(final JsonReader r = Json.createReader(newReader(name, getClass()))){
+        try (final JsonReader r = Json.createReader(newReader(name, getClass()))) {
             final JsonStructure json = r.read();
-            final JsonMetaObjectTestDriver typeSystem = processor.getMetaObjects();
+            final MetaObject<JsonValue> typeSystem = processor.getMetaObjects();
             final Type jsonType = typeSystem.getMetaObject("JSON");
 
             assertTrue(typeSystem.is(json, jsonType));

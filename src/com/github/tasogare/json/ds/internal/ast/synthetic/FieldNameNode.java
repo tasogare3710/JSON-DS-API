@@ -4,6 +4,8 @@
 
 package com.github.tasogare.json.ds.internal.ast.synthetic;
 
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.AstNode;
 import com.github.tasogare.json.ds.internal.ast.StringLiteralNode;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
@@ -37,7 +39,7 @@ public interface FieldNameNode extends NameValue {
         }
 
         @Override
-        public <R> R accept(NodeVisitor<R> visitor) {
+        public <R> R accept(NodeVisitor<R> visitor) throws RuntimeSemanticsException, StaticSemanticsException {
             return visitor.visit(this);
         }
 

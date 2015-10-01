@@ -4,6 +4,12 @@
 
 package com.github.tasogare.json.ds.parser;
 
+/**
+ * @deprecated not used
+ * @author tasogare
+ *
+ */
+@Deprecated
 public class SourceException extends RuntimeException {
 
     private static final long serialVersionUID = -2378572089292572246L;

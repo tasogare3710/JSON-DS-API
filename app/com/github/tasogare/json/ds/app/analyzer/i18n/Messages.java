@@ -37,7 +37,7 @@ public enum Messages {
 
     LoadServiceFailedMessage("service.load.failed.message"),
 
-    ValidateServiceSucceededMessage("service.validate.succeeded.message"){
+    ValidateServiceSucceededMessage("service.validate.succeeded.message") {
         @Override
         public String format(ResourceBundle resources, Object... args) throws IllegalArgumentException {
             final String message = from(resources);
@@ -48,6 +48,7 @@ public enum Messages {
     ValidateServiceFailedMessage("service.validate.failed.message");
 
     private final String key;
+
     private Messages(String key) {
         this.key = key;
     }

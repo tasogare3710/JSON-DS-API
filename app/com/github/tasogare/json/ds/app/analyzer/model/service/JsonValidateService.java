@@ -11,10 +11,11 @@ import java.io.FileReader;
 import javax.json.Json;
 import javax.json.JsonReader;
 import javax.json.JsonStructure;
+import javax.json.JsonValue;
 
+import com.github.tasogare.json.ds.MetaObject;
 import com.github.tasogare.json.ds.datatype.Type;
 import com.github.tasogare.json.ds.datatype.driver.JsonDsProcessorHoistableTestDriver;
-import com.github.tasogare.json.ds.datatype.driver.JsonMetaObjectTestDriver;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -40,14 +41,24 @@ public class JsonValidateService extends Service<Boolean> {
                 try (BufferedReader r = new BufferedReader(new FileReader(getSchema()))) {
                     processor.process(r, getSchema().toURI().toURL());
                 }
+                updateMessage("schema processed");
+                updateProgress(1, 3);
+
                 final JsonStructure structure;
                 try (BufferedReader r = new BufferedReader(new FileReader(getJson()))) {
                     final JsonReader jsonReader = Json.createReader(r);
                     structure = jsonReader.read();
                 }
-                final JsonMetaObjectTestDriver metaObjects = processor.getMetaObjects();
+                updateMessage("json loaded");
+                updateProgress(2, 3);
+
+                final MetaObject<JsonValue> metaObjects = processor.getMetaObjects();
                 final Type jsonType = metaObjects.getMetaObject("JSON");
-                return metaObjects.is(structure, jsonType);
+                final boolean result = metaObjects.is(structure, jsonType);
+                updateMessage("end validation");
+                updateProgress(3, 3);
+
+                return result;
             }
         };
     }

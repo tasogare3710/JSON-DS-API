@@ -14,11 +14,11 @@ public class SourcePear {
     private final ObjectProperty<File> schema;
     private final ObjectProperty<File> json;
 
-    public SourcePear(){
+    public SourcePear() {
         this(null, null);
     }
 
-    public SourcePear(File schema){
+    public SourcePear(File schema) {
         this(schema, null);
     }
 
@@ -30,31 +30,25 @@ public class SourcePear {
     public final ObjectProperty<File> schemaProperty() {
         return schema;
     }
-    
 
     public final File getSchema() {
         return schemaProperty().get();
     }
-    
 
     public final void setSchema(final File schema) {
         schemaProperty().set(schema);
     }
-    
 
     public final ObjectProperty<File> jsonProperty() {
         return json;
     }
-    
 
     public final File getJson() {
         return jsonProperty().get();
     }
-    
 
     public final void setJson(final File json) {
         jsonProperty().set(json);
     }
-    
 
 }

@@ -4,6 +4,8 @@
 
 package com.github.tasogare.json.ds.internal.ast;
 
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.synthetic.NameValue;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 
@@ -12,21 +14,22 @@ import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
  * @author tasogare
  *
  */
-public class IdentifierNode extends AstNode implements NameValue,  Cloneable {
+public class IdentifierNode extends AstNode implements NameValue, Cloneable {
 
     private final String identifier;
+
     public IdentifierNode(final long startPosition, final long endPosition, final String identifier) {
         super(startPosition, endPosition);
         this.identifier = identifier;
     }
 
     @Override
-    public <R> R accept(NodeVisitor<R> visitor) {
+    public <R> R accept(NodeVisitor<R> visitor) throws RuntimeSemanticsException, StaticSemanticsException {
         return visitor.visit(this);
     }
 
     @Override
-    public String getString(){
+    public String getString() {
         return identifier;
     }
 

@@ -20,17 +20,8 @@ import com.github.tasogare.json.ds.internal.ast.TypeExpressionNodeTest;
 import com.github.tasogare.json.ds.internal.ast.UnionTypeNodeTest;
 
 @RunWith(Suite.class)
-@SuiteClasses({
-    ArrayTypeNodeTest.class,
-    AstNodeCloneableTest.class,
-    NullLiteralNodeTest.class,
-    PragmaNodeTest.class,
-    ProgramNodeTest.class,
-    RecordTypeNodeTest.class,
-    StringLiteralNodeTest.class,
-    TypeDefinitionNodeTest.class,
-    TypeExpressionNodeTest.class,
-    UnionTypeNodeTest.class
-})
+@SuiteClasses({ArrayTypeNodeTest.class, AstNodeCloneableTest.class, NullLiteralNodeTest.class, PragmaNodeTest.class,
+    ProgramNodeTest.class, RecordTypeNodeTest.class, StringLiteralNodeTest.class, TypeDefinitionNodeTest.class,
+    TypeExpressionNodeTest.class, UnionTypeNodeTest.class })
 public class AstAllTest {
 }

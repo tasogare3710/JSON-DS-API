@@ -96,7 +96,7 @@ public class AnyTypeTest {
     }
 
     @Test
-    public void testNonNullableAnyTypeSuccess(){
+    public void testNonNullableAnyTypeSuccess() {
         assertTrue(Intrinsics.nonNullableAnyType.isTypeOf(Intrinsics.anyType));
         assertTrue(Intrinsics.nonNullableAnyType.isTypeOf(Intrinsics.booleanType));
         assertTrue(Intrinsics.nonNullableAnyType.isTypeOf(Intrinsics.nonNullableAnyType));
@@ -113,14 +113,14 @@ public class AnyTypeTest {
      * だが、このテストがtrueとなるのは今のところ仕様とする。
      */
     @Test
-    public void testNonNullableAnyTypeSuccess2(){
+    public void testNonNullableAnyTypeSuccess2() {
         assertTrue(Intrinsics.nonNullableAnyType.isTypeOf(Intrinsics.newNullable(Intrinsics.booleanType)));
         assertTrue(Intrinsics.nonNullableAnyType.isTypeOf(Intrinsics.newNullable(Intrinsics.numberType)));
         assertTrue(Intrinsics.nonNullableAnyType.isTypeOf(Intrinsics.newNullable(Intrinsics.stringType)));
     }
 
     @Test
-    public void testNonNullableAnyTypeFail(){
+    public void testNonNullableAnyTypeFail() {
         assertFalse(Intrinsics.nonNullableAnyType.isTypeOf(Intrinsics.nullType));
     }
 }

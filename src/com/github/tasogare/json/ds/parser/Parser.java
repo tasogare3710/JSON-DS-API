@@ -34,6 +34,7 @@ import static com.github.tasogare.json.ds.parser.Token.UsePragma;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.AnyTypeNode;
 import com.github.tasogare.json.ds.internal.ast.ArrayTypeNode;
 import com.github.tasogare.json.ds.internal.ast.AstContext;
@@ -56,6 +57,7 @@ import com.github.tasogare.json.ds.internal.ast.synthetic.DirectiveNode;
 import com.github.tasogare.json.ds.internal.ast.synthetic.FieldNameNode;
 
 /**
+ * FIXME: ASTノードの位置情報を正しく与えなければならない
  * 構文解析を行いASTを返すパーサー。このパーサは主に意味解析を行うJSON-DSプロセッサによって利用される。
  * 
  * @author tasogare
@@ -64,18 +66,23 @@ import com.github.tasogare.json.ds.internal.ast.synthetic.FieldNameNode;
 public class Parser {
 
     protected final TokenStream ts;
-    protected final String sourceName;
 
-    public Parser(final TokenStream ts, final String sourceName) {
+    public Parser(final TokenStream ts) {
         this.ts = ts;
-        this.sourceName = sourceName;
     }
 
-    public <D extends AstNode & DirectiveNode<D>> ProgramNode<D> parse() throws ParserException {
+    public <D extends AstNode & DirectiveNode<D>> ProgramNode<D> parse() throws StaticSemanticsException {
         return this. <D> parseProgram();
     }
 
-    protected List<PragmaNode> parsePragmas() {
+    /**
+     * @return
+     */
+    public SourceInfo createCurrentSourceInfo() {
+        return ts.createCurrentSourceInfo();
+    }
+
+    protected List<PragmaNode> parsePragmas() throws StaticSemanticsException {
         //@formatter:off
         // Pragmas
         //      «empty»
@@ -95,7 +102,7 @@ public class Parser {
         return pragmas;
     }
 
-    protected PragmaNode parsePragma() {
+    protected PragmaNode parsePragma() throws StaticSemanticsException {
         //@formatter:off
         // # include pragma proposal
         // Pragma
@@ -105,8 +112,7 @@ public class Parser {
         //@formatter:on
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (!t.equals(UsePragma, EscapedUsePragma, IncludePragma, EscapedIncludePragma)) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
 
         final PragmaNode pragma;
@@ -121,8 +127,7 @@ public class Parser {
 
         t = ts.scanTokenWithoutOf(Comment);
         if (t == Eof || t != SemiColon) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
 
         return pragma;
@@ -130,8 +135,9 @@ public class Parser {
 
     /**
      * @return
+     * @throws StaticSemanticsException
      */
-    protected PragmaNode parseUsePragma() {
+    protected PragmaNode parseUsePragma() throws StaticSemanticsException {
         //@formatter:off
         // UsePragma
         //      "use"  "standard" [ContextuallyReservedIdentifier]
@@ -147,18 +153,16 @@ public class Parser {
         //@formatter:on
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t == SemiColon) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
         ts.pushPendding(t);
-        
+
         final List<IdentifierNode> items = new ArrayList<>();
         int count = 0;
         while (true) {
             t = ts.scanTokenWithoutOf(Comment);
             if (t == Eof) {
-                throw new ParserException(
-                    new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+                throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
             }
             // PragmaItem
             final IdentifierNode ident = parseIdentifier();
@@ -167,11 +171,9 @@ public class Parser {
             if (ident instanceof ContextuallyReservedIdentifierNode) {
                 final ContextuallyReservedIdentifierNode crident = (ContextuallyReservedIdentifierNode) ident;
                 if (crident.isStandard() || crident.isStrict()) {
-                    // TODO: 11.6.1.1 - Static Semantics: Early Errors
                     if (count != 0) {
-                        throw new ParserException(new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(),
-                            sourceName, ts.source()));
-                    }else{
+                        throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
+                    } else {
                         return new<ContextuallyReservedIdentifierNode> PragmaNode(0, ts.position(), "use", crident);
                     }
                 }
@@ -192,11 +194,10 @@ public class Parser {
     }
 
     @Deprecated
-    protected PragmaNode parseUsePragmaItems() {
+    protected PragmaNode parseUsePragmaItems() throws StaticSemanticsException {
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t == SemiColon) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
         ts.pushPendding(t);
 
@@ -204,8 +205,7 @@ public class Parser {
         while (true) {
             t = ts.scanTokenWithoutOf(Comment);
             if (t == Eof) {
-                throw new ParserException(
-                    new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+                throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
             }
             // PragmaItem
             items.add(parseIdentifier());
@@ -219,7 +219,7 @@ public class Parser {
         return new<IdentifierNode> PragmaNode(0, ts.position(), "use", items);
     }
 
-    protected PragmaNode parseIncludePragma() {
+    protected PragmaNode parseIncludePragma() throws StaticSemanticsException {
         //@formatter:off
         // IncludePragma
         //      "include"  IncludePragmaItem
@@ -229,27 +229,24 @@ public class Parser {
         return pragma;
     }
 
-    protected StringLiteralNode parseIncludePragmaItem() {
+    protected StringLiteralNode parseIncludePragmaItem() throws StaticSemanticsException {
         //@formatter:off
         // IncludePragmaItem
         //      StringLiteral
         //@formatter:on
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t == SemiColon) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
         ts.pushPendding(t);
 
         t = ts.scanTokenWithoutOf(Comment);
         if (t == Eof) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
         // PragmaItem
         if (t != StringLiteral) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
         final String str = ts.asStringLiteral();
         return new StringLiteralNode(0, ts.position(), str);
@@ -258,9 +255,10 @@ public class Parser {
     /**
      * 
      * @return
+     * @throws StaticSemanticsException 
      */
     @SuppressWarnings("unchecked")
-    protected <D extends AstNode & DirectiveNode<D>> ProgramNode<D> parseProgram() {
+    protected <D extends AstNode & DirectiveNode<D>> ProgramNode<D> parseProgram() throws StaticSemanticsException {
         //@formatter:off
         // Program
         //      Pragmas  Directives
@@ -286,11 +284,11 @@ public class Parser {
         return (ProgramNode<D>) program;
     }
 
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> TypeDefinitionNode<T> parseDirective() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> TypeDefinitionNode<T> parseDirective() throws StaticSemanticsException {
         return parseAttributedDirective();
     }
 
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> TypeDefinitionNode<T> parseAttributedDirective() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> TypeDefinitionNode<T> parseAttributedDirective() throws StaticSemanticsException {
         //@formatter:off
         // AttributedDirective
         //      TypeDefinition Semicolon
@@ -305,25 +303,22 @@ public class Parser {
             // 一度EOFを返したらそれ以降は何度でもEOFを返すのでpenddingは必要ない。
             return td;
         }
-        throw new ParserException(
-            new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+        throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
     }
 
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> TypeDefinitionNode<T> parseTypeDefinition() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> TypeDefinitionNode<T> parseTypeDefinition() throws StaticSemanticsException {
         //@formatter:off
         // TypeDefinition
         //      "type" Identifier TypeInitialisation
         //@formatter:on
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (!(t == TypeOperator || t == EscapedTypeOperator)) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
 
         t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (!(t == Identifier || t == EscapedIdentifier)) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
         final IdentifierNode identifier = parseIdentifier();
         TypeExpressionNode<T> te = parseTypeInitialisation();
@@ -348,20 +343,19 @@ public class Parser {
         return identifier;
     }
 
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> TypeExpressionNode<T> parseTypeInitialisation() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> TypeExpressionNode<T> parseTypeInitialisation() throws StaticSemanticsException {
         //@formatter:off
         // TypeInitialisation
         //      "=" TypeExpression
         //@formatter:on
         final Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t != Assign) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
         return parseTypeExpression();
     }
 
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> TypeExpressionNode<T> parseTypeExpression() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> TypeExpressionNode<T> parseTypeExpression() throws StaticSemanticsException {
         //@formatter:off
         // TypeExpression
         //      BasicTypeExpression
@@ -384,7 +378,7 @@ public class Parser {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> T parseBasicTypeExpression() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> T parseBasicTypeExpression() throws StaticSemanticsException {
         //@formatter:off
         // BasicTypeExpression
         //      "*"
@@ -410,8 +404,7 @@ public class Parser {
         case LBracket:
             return (T) parseArrayType();
         default:
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
     }
 
@@ -434,7 +427,7 @@ public class Parser {
         return new NameExpressionNode(ts.position(), ts.position(), identifier);
     }
 
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> UnionTypeNode<T> parseUnionType() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> UnionTypeNode<T> parseUnionType() throws StaticSemanticsException {
         //@formatter:off
         // UnionType
         //      "(" TypeUnionList ")"
@@ -447,8 +440,9 @@ public class Parser {
     /**
      * 
      * @return
+     * @throws StaticSemanticsException 
      */
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> List<TypeExpressionNode<T>> parseTypeUnionList() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> List<TypeExpressionNode<T>> parseTypeUnionList() throws StaticSemanticsException {
         //@formatter:off
         // TypeUnionList
         //      «empty»
@@ -462,8 +456,7 @@ public class Parser {
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         // TypeExpression | NonemptyTypeUnionList なので空の | は無効
         if (t == Or) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
 
         if (t == RParen) {
@@ -477,8 +470,7 @@ public class Parser {
             list.add(te);
             t = ts.scanTokenWithoutOf(Comment, LineTerminator);
             if (t == Eof) {
-                throw new ParserException(
-                    new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+                throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
             }
             if (t == Or) {
                 continue;
@@ -490,7 +482,7 @@ public class Parser {
         return list;
     }
 
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> RecordTypeNode<T> parseRecordType() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> RecordTypeNode<T> parseRecordType() throws StaticSemanticsException {
         //@formatter:off
         // RecordType
         //      "{" FieldTypeList "}"
@@ -503,8 +495,9 @@ public class Parser {
 
     /**
      * @return
+     * @throws StaticSemanticsException 
      */
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> List<FieldTypeNode<T>> parseFieldTypeList() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> List<FieldTypeNode<T>> parseFieldTypeList() throws StaticSemanticsException {
         //@formatter:off
         // FieldTypeList
         //      «empty»
@@ -515,22 +508,19 @@ public class Parser {
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         if (t == Comma) {
             // 空のカンマは許されない
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
         while (true) {
             switch (t) {
             case Eof:
-                throw new ParserException(
-                    new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+                throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
             case StringLiteral:
                 list.add(parseFieldType());
                 t = ts.scanTokenWithoutOf(Comment);
                 if (t == Comma || t == LineTerminator || t == RBrace) {
                     continue;
                 }
-                throw new ParserException(
-                    new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+                throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
             case LineTerminator:
             case Comma:
                 t = ts.scanTokenWithoutOf(Comment);
@@ -538,13 +528,12 @@ public class Parser {
             case RBrace:
                 return list;
             default:
-                throw new ParserException(
-                    new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+                throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
             }
         }
     }
 
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> FieldTypeNode<T> parseFieldType() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> FieldTypeNode<T> parseFieldType() throws StaticSemanticsException {
         //@formatter:off
         // FieldType
         //      FieldName : TypeExpression
@@ -554,8 +543,7 @@ public class Parser {
         Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         // JSON-DSでは型注釈の付かないフィールドは許されない
         if (t != Colon) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
         final TypeExpressionNode<T> te = parseTypeExpression();
 
@@ -563,7 +551,7 @@ public class Parser {
         return new FieldTypeNode<T>(ts.position(), ts.position(), fn, te);
     }
 
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> ArrayTypeNode<T> parseArrayType() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> ArrayTypeNode<T> parseArrayType() throws StaticSemanticsException {
         //@formatter:off
         // ArrayType
         //      "[" ElementTypeList "]"
@@ -573,8 +561,7 @@ public class Parser {
         final Token t = ts.scanTokenWithoutOf(Comment, LineTerminator);
         // JSON-DSでは [,,,]や[ , foo]という記述は許可されない
         if (t == Comma) {
-            throw new ParserException(
-                new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+            throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
         }
         ts.pushPendding(t);
         return parseElementTypeList();
@@ -583,8 +570,9 @@ public class Parser {
     /**
      * 
      * @return
+     * @throws StaticSemanticsException 
      */
-    protected <T extends AstNode & BasicTypeExpressionNode<T>> ArrayTypeNode<T> parseElementTypeList() {
+    protected <T extends AstNode & BasicTypeExpressionNode<T>> ArrayTypeNode<T> parseElementTypeList() throws StaticSemanticsException {
         //@formatter:off
         // ElementTypeList
         //      «empty»
@@ -611,12 +599,10 @@ public class Parser {
                 if (t == Comma) {
                     t = ts.scanTokenWithoutOf(Comment, LineTerminator);
                     if (t != RBracket) {
-                        throw new ParserException(new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(),
-                            sourceName, ts.source()));
+                        throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
                     }
                 } else if (t != RBracket) {
-                    throw new ParserException(
-                        new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+                    throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
                 }
                 return new ArrayTypeNode<T>(ts.position(), ts.position(), list, variableType);
             } else if (t == RBracket) {
@@ -633,8 +619,7 @@ public class Parser {
                     ts.pushPendding(t);
                     continue;
                 } else if (t != RBracket) {
-                    throw new ParserException(
-                        new SourceInfo(ts.row(), ts.column(), ts.lineStart(), ts.position(), sourceName, ts.source()));
+                    throw StaticSemanticsException.newSyntaxError(createCurrentSourceInfo());
                 }
                 break;
             }

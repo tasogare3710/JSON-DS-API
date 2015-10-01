@@ -18,7 +18,7 @@
    <left>
       <ToolBar maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" orientation="VERTICAL" prefWidth="96.0" BorderPane.alignment="CENTER">
         <items>
-          <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleAnalyzeButton" prefHeight="48.0" text="%toolbar.button.analyze.label" />
+          <Button fx:id="analyzeButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleAnalyzeButton" prefHeight="48.0" text="%toolbar.button.analyze.label" />
             <Button fx:id="validateButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleValidateButton" prefHeight="48.0" text="%toolbar.button.validate.label" />
             <Separator prefHeight="5.0" />
             <ToggleButton fx:id="fullscreenToggleButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleFullscreenToggleButton" prefHeight="48.0" text="%toolbar.button.toggle.fullscreen.label.state.off" />

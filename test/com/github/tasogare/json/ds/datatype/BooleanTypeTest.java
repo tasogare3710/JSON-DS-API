@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import com.github.tasogare.json.ds.datatype.BooleanType;
 
-
 public class BooleanTypeTest {
 
     @BeforeClass
@@ -54,7 +53,7 @@ public class BooleanTypeTest {
     }
 
     @Test
-    public void testBooleanTypeIsNonNullable(){
+    public void testBooleanTypeIsNonNullable() {
         assertFalse(booleanType.isTypeOf(nullType));
     }
 }

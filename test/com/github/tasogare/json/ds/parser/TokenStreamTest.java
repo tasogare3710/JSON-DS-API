@@ -20,9 +20,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.github.tasogare.json.ds.parser.ParserException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.parser.Source;
-import com.github.tasogare.json.ds.parser.SourceException;
 import com.github.tasogare.json.ds.parser.Token;
 import com.github.tasogare.json.ds.parser.TokenStream;
 
@@ -45,8 +44,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testAnyType() {
-        final TokenStream ts = new TokenStream(new Source("type Any = *;"));
+    public void testAnyType() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("type Any = *;"), "heep");
         assertThat(ts.scanToken(), is(Token.TypeOperator));
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("Any"));
@@ -57,8 +56,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testArrayType() {
-        final TokenStream ts = new TokenStream(new Source("type A = [number, string];"));
+    public void testArrayType() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("type A = [number, string];"), "heep");
         assertThat(ts.scanToken(), is(Token.TypeOperator));
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("A"));
@@ -74,92 +73,92 @@ public class TokenStreamTest {
         assertThat(ts.scanToken(), is(Token.Eof));
     }
 
-    public void testAsComment() {
-        final TokenStream ts = new TokenStream(new Source("// aaaa"));
+    public void testAsComment() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("// aaaa"), "heep");
         assertThat(ts.scanToken(), is(Token.Comment));
         assertThat(ts.asComment(), equalTo(" aaaa"));
     }
 
     @Test
-    public void testAsEscapedIdentifier() {
-        final TokenStream ts = new TokenStream(new Source( "\\u" + "0061"));
+    public void testAsEscapedIdentifier() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("\\u" + "0061"), "heep");
         assertThat(ts.scanToken(), is(Token.EscapedIdentifier));
         assertThat(ts.asEscapedIdentifier(), equalTo("a"));
     }
 
-    public void testAsIdentifier() {
-        final TokenStream ts = new TokenStream(new Source("C"));
+    public void testAsIdentifier() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("C"), "heep");
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("C"));
     }
 
-    public void testAsStringLiteral() {
-        final TokenStream ts = new TokenStream(new Source("\"bbb\""));
+    public void testAsStringLiteral() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("\"bbb\""), "heep");
         assertThat(ts.scanToken(), is(Token.StringLiteral));
         assertThat(ts.asStringLiteral(), equalTo("bbb"));
     }
 
-    @Test(expected = SourceException.class)
-    public void testBadAsComment() {
-        final TokenStream ts = new TokenStream(new Source("\"aaa\""));
+    @Test(expected = IllegalStateException.class)
+    public void testBadAsComment() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("\"aaa\""), "heep");
         assertThat(ts.scanToken(), is(Token.StringLiteral));
         ts.asComment();
     }
 
-    @Test(expected = SourceException.class)
-    public void testBadAsEscapedIdentifier() {
-        final TokenStream ts = new TokenStream(new Source("aaa"));
+    @Test(expected = IllegalStateException.class)
+    public void testBadAsEscapedIdentifier() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("aaa"), "heep");
         assertThat(ts.scanToken(), is(Token.Identifier));
         ts.asEscapedIdentifier();
     }
 
-    @Test(expected=SourceException.class)
-    public void testBadAsHex4DigitsEscapedIdentifier() {
-        final TokenStream ts = new TokenStream(new Source("\\u2f804"));
+    @Test(expected = StaticSemanticsException.class)
+    public void testBadAsHex4DigitsEscapedIdentifier() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("\\u2f804"), "heep");
         assertThat(ts.scanToken(), is(Token.EscapedIdentifier));
     }
 
-    @Test(expected = SourceException.class)
-    public void testBadAsIdentifier() {
-        final TokenStream ts = new TokenStream(new Source("\\u0041"));
+    @Test(expected = IllegalStateException.class)
+    public void testBadAsIdentifier() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("\\u0041"), "heep");
         assertThat(ts.scanToken(), is(Token.EscapedIdentifier));
         ts.asIdentifier();
     }
 
-    @Test(expected = SourceException.class)
-    public void testBadAsStringLiteral() {
-        final TokenStream ts = new TokenStream(new Source("// aaa"));
+    @Test(expected = IllegalStateException.class)
+    public void testBadAsStringLiteral() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("// aaa"), "heep");
         assertThat(ts.scanToken(), is(Token.Comment));
         ts.asStringLiteral();
     }
 
-    @Test(expected = SourceException.class)
-    public void testBadMultiLineCommentWithFinished() {
-        final TokenStream ts = new TokenStream(new Source("/* aaa"));
+    @Test(expected = StaticSemanticsException.class)
+    public void testBadMultiLineCommentWithFinished() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("/* aaa"), "heep");
         assertThat(ts.scanToken(), is(Token.Comment));
     }
 
-    @Test(expected = SourceException.class)
-    public void testBadMultiLineCommentWithInsideEndComment() {
-        final TokenStream ts = new TokenStream(new Source("/* */ */"));
+    @Test(expected = StaticSemanticsException.class)
+    public void testBadMultiLineCommentWithInsideEndComment() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("/* */ */"), "heep");
         assertThat(ts.scanToken(), is(Token.Comment));
         assertThat(ts.scanToken(), is(Token.Any));
         ts.scanToken();
     }
 
     @Test
-    public void testBrace() {
-        final TokenStream ts = new TokenStream(new Source("{}"));
+    public void testBrace() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("{}"), "heep");
         assertThat(ts.scanToken(), is(Token.LBrace));
         assertThat(ts.scanToken(), is(Token.RBrace));
         assertThat(ts.scanToken(), is(Token.Eof));
 
-        final TokenStream ts2 = new TokenStream(new Source("{     }"));
+        final TokenStream ts2 = new TokenStream(new Source("{     }"), "heep");
         assertThat(ts2.scanToken(), is(Token.LBrace));
         assertThat(ts2.scanToken(), is(Token.RBrace));
         assertThat(ts2.scanToken(), is(Token.Eof));
 
-        final TokenStream ts3 = new TokenStream(new Source("{\n\r\"p\"}"));
+        final TokenStream ts3 = new TokenStream(new Source("{\n\r\"p\"}"), "heep");
         assertThat(ts3.scanToken(), is(Token.LBrace));
         assertThat(ts3.scanToken(), is(Token.LineTerminator));
         assertThat(ts3.scanToken(), is(Token.LineTerminator));
@@ -170,8 +169,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testEmptyArrayType() {
-        final TokenStream ts = new TokenStream(new Source("type A = [];"));
+    public void testEmptyArrayType() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("type A = [];"), "heep");
         assertThat(ts.scanToken(), is(Token.TypeOperator));
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("A"));
@@ -183,8 +182,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testEmptySingleLineCommentWithLineTerminator() {
-        final TokenStream ts = new TokenStream(new Source("//\r\n//\n\r"));
+    public void testEmptySingleLineCommentWithLineTerminator() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("//\r\n//\n\r"), "heep");
         assertThat(ts.scanToken(), is(Token.Comment));
         assertThat(ts.asComment(), equalTo(""));
         assertThat(ts.scanToken(), is(Token.LineTerminator));
@@ -198,8 +197,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testEmptyUnionType() {
-        final TokenStream ts = new TokenStream(new Source("type E = ();"));
+    public void testEmptyUnionType() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("type E = ();"), "heep");
         assertThat(ts.scanToken(), is(Token.TypeOperator));
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("E"));
@@ -211,14 +210,14 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testEof() {
-        final TokenStream ts = new TokenStream(new Source(""));
+    public void testEof() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source(""), "heep");
         assertThat(ts.scanToken(), is(Token.Eof));
     }
 
     @Test
-    public void testEscapedIdentifier() {
-        final TokenStream ts = new TokenStream(new Source("type \\u0061 = number;"));
+    public void testEscapedIdentifier() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("type \\u0061 = number;"), "heep");
         assertThat(ts.scanToken(), is(Token.TypeOperator));
         assertThat(ts.scanToken(), is(Token.EscapedIdentifier));
         assertThat(ts.asEscapedIdentifier(), equalTo("a"));
@@ -232,10 +231,10 @@ public class TokenStreamTest {
     @Test
     public void testEscapedReservedIdentifier() throws IOException {
         final String name = "com/github/tasogare/json/ds/parser/resources/ts/testEscapedReservedIdentifier.jsds";
-        try(BufferedReader r = newReader(name, getClass())){
-            final TokenStream ts = new TokenStream(new Source(r));
+        try (BufferedReader r = newReader(name, getClass())) {
+            final TokenStream ts = new TokenStream(new Source(r), name);
             assertThat(ts.scanToken(), is(Token.EscapedTypeOperator));
-        } catch(ParserException e){
+        } catch (StaticSemanticsException e) {
             reportError(e);
             fail();
         }
@@ -244,18 +243,18 @@ public class TokenStreamTest {
     @Test
     public void testEscapedReservedIdentifier2() throws IOException {
         final String name = "com/github/tasogare/json/ds/parser/resources/ts/testEscapedReservedIdentifier2.jsds";
-        try(BufferedReader r = newReader(name, getClass())){
-            final TokenStream ts = new TokenStream(new Source(r));
+        try (BufferedReader r = newReader(name, getClass())) {
+            final TokenStream ts = new TokenStream(new Source(r), name);
             assertThat(ts.scanToken(), is(Token.EscapedTypeOperator));
-        } catch(ParserException e){
+        } catch (StaticSemanticsException e) {
             reportError(e);
             fail();
         }
     }
 
     @Test
-    public void testIdentifier() {
-        final TokenStream ts = new TokenStream(new Source("type typo = number;"));
+    public void testIdentifier() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("type typo = number;"), "heep");
         assertThat(ts.scanToken(), is(Token.TypeOperator));
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("typo"));
@@ -267,8 +266,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testIncludePragma() {
-        final TokenStream ts = new TokenStream(new Source("include \"./part2.jsds\";"));
+    public void testIncludePragma() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("include \"./part2.jsds\";"), "heep");
         assertThat(ts.scanToken(), is(Token.IncludePragma));
         assertThat(ts.scanToken(), is(Token.StringLiteral));
         assertThat(ts.asStringLiteral(), equalTo("./part2.jsds"));
@@ -277,7 +276,7 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testLineterminator() {
+    public void testLineterminator() throws StaticSemanticsException {
         CharArrayWriter caw = new CharArrayWriter();
         // <LF>
         caw.write(0x0A);
@@ -292,7 +291,7 @@ public class TokenStreamTest {
         caw.write(0x0A);
 
         // TokenStream lexer do not process the Automatic Semicolon Insertions
-        final TokenStream ts = new TokenStream(new Source(caw.toString()));
+        final TokenStream ts = new TokenStream(new Source(caw.toString()), "heep");
         assertThat(ts.scanToken(), is(Token.LineTerminator));
         assertThat(ts.scanToken(), is(Token.LineTerminator));
         assertThat(ts.scanToken(), is(Token.LineTerminator));
@@ -302,16 +301,16 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testMultiLineComment() {
-        final TokenStream ts = new TokenStream(new Source("/* * /\r\n */"));
+    public void testMultiLineComment() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("/* * /\r\n */"), "heep");
         assertThat(ts.scanToken(), is(Token.Comment));
         assertThat(ts.asComment(), equalTo(" * /\r\n "));
         assertThat(ts.scanToken(), is(Token.Eof));
     }
 
     @Test
-    public void testMultiLineComment2() {
-        final TokenStream ts = new TokenStream(new Source("/*   */type N = number;"));
+    public void testMultiLineComment2() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("/*   */type N = number;"), "heep");
         assertThat(ts.scanToken(), is(Token.Comment));
         assertThat(ts.asComment(), equalTo("   "));
         assertThat(ts.scanToken(), is(Token.TypeOperator));
@@ -325,8 +324,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testNotNullable() {
-        final TokenStream ts = new TokenStream(new Source("type N = number!;"));
+    public void testNotNullable() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("type N = number!;"), "heep");
         assertThat(ts.scanToken(), is(Token.TypeOperator));
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("N"));
@@ -339,8 +338,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testNullable() {
-        final TokenStream ts = new TokenStream(new Source("type N = number?;"));
+    public void testNullable() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("type N = number?;"), "heep");
         assertThat(ts.scanToken(), is(Token.TypeOperator));
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("N"));
@@ -353,8 +352,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testRecordType() {
-        final TokenStream ts = new TokenStream(new Source("type R = {\"a\": number, \"b\": string};"));
+    public void testRecordType() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("type R = {\"a\": number, \"b\": string};"), "heep");
         assertThat(ts.scanToken(), is(Token.TypeOperator));
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("R"));
@@ -377,8 +376,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testSingleLineCommentWithCRLF() {
-        final TokenStream ts = new TokenStream(new Source("//aa\r\n//bb"));
+    public void testSingleLineCommentWithCRLF() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("//aa\r\n//bb"), "heep");
         assertThat(ts.scanToken(), is(Token.Comment));
         assertThat(ts.asComment(), equalTo("aa"));
         assertThat(ts.scanToken(), is(Token.LineTerminator));
@@ -388,8 +387,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testSingleLineCommentWithLFCR() {
-        final TokenStream ts = new TokenStream(new Source("//aa\n\r//bb"));
+    public void testSingleLineCommentWithLFCR() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("//aa\n\r//bb"), "heep");
         assertThat(ts.scanToken(), is(Token.Comment));
         assertThat(ts.asComment(), equalTo("aa"));
         assertThat(ts.scanToken(), is(Token.LineTerminator));
@@ -400,16 +399,16 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testStringLiteral() {
-        final TokenStream ts = new TokenStream(new Source("\"test\""));
+    public void testStringLiteral() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("\"test\""), "heep");
         final Token stringLiteral = ts.scanToken();
         assertThat(stringLiteral, is(Token.StringLiteral));
         assertThat(ts.asStringLiteral(), equalTo("test"));
     }
 
     @Test
-    public void testStringLiteralWithEscapedBMP() {
-        final TokenStream ts = new TokenStream(new Source("\"\u0030\", \"\u3042\""));
+    public void testStringLiteralWithEscapedBMP() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("\"\u0030\", \"\u3042\""), "heep");
         Token stringLiteral = ts.scanToken();
         assertThat(stringLiteral, is(Token.StringLiteral));
         assertThat(ts.asStringLiteral(), equalTo("0"));
@@ -422,7 +421,7 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testStringLiteralWithEscapedSurrogatePear() throws IOException {
+    public void testStringLiteralWithEscapedSurrogatePear() throws IOException, StaticSemanticsException {
         final CharArrayWriter caw = new CharArrayWriter();
         // "a"
         final String str = "\"" + "\\" + "u0061" + "\"";
@@ -430,14 +429,14 @@ public class TokenStreamTest {
         caw.write(str);
         caw.write(", ");
 
-        final TokenStream ts = new TokenStream(new Source(caw.toString()));
+        final TokenStream ts = new TokenStream(new Source(caw.toString()), "heep");
         assertThat(ts.scanToken(), is(Token.StringLiteral));
         final String stringLiteral = ts.asStringLiteral();
         assertThat(stringLiteral, equalTo("a"));
     }
 
     @Test
-    public void testStringLiteralWithEscapedSurrogatePear2() throws IOException {
+    public void testStringLiteralWithEscapedSurrogatePear2() throws IOException, StaticSemanticsException {
         final CharArrayWriter caw = new CharArrayWriter();
         // "type"
         final String str = "\"" + "\\u0074\\u0079\\u0070\\u0065" + "\"";
@@ -445,14 +444,14 @@ public class TokenStreamTest {
         caw.write(str);
         caw.write(", ");
 
-        final TokenStream ts = new TokenStream(new Source(caw.toString()));
+        final TokenStream ts = new TokenStream(new Source(caw.toString()), "heep");
         assertThat(ts.scanToken(), is(Token.StringLiteral));
         final String stringLiteral = ts.asStringLiteral();
         assertThat(stringLiteral, equalTo("type"));
     }
 
     @Test
-    public void testStringLiteralWithEscapedSurrogatePearChop() throws IOException {
+    public void testStringLiteralWithEscapedSurrogatePearChop() throws IOException, StaticSemanticsException {
         final CharArrayWriter caw = new CharArrayWriter();
         // "你"
         final String str = "\"" + "\\" + "u2F804" + "\"";
@@ -460,14 +459,14 @@ public class TokenStreamTest {
         caw.write(str);
         caw.write(", ");
 
-        final TokenStream ts = new TokenStream(new Source(caw.toString()));
+        final TokenStream ts = new TokenStream(new Source(caw.toString()), "heep");
         assertThat(ts.scanToken(), is(Token.StringLiteral));
         final String stringLiteral = ts.asStringLiteral();
         assertThat(stringLiteral, equalTo("⾀4"));
     }
 
     @Test
-    public void testStringLiteralWithEscapedSurrogatePearOnBrace() throws IOException {
+    public void testStringLiteralWithEscapedSurrogatePearOnBrace() throws IOException, StaticSemanticsException {
         final CharArrayWriter caw = new CharArrayWriter();
         // "你"
         final String str = "\"" + "\\" + "u{2F804}\"";
@@ -475,28 +474,28 @@ public class TokenStreamTest {
         caw.write(str);
         caw.write(", ");
 
-        final TokenStream ts = new TokenStream(new Source(caw.toString()));
+        final TokenStream ts = new TokenStream(new Source(caw.toString()), "heep");
         assertThat(ts.scanToken(), is(Token.StringLiteral));
         final String stringLiteral = ts.asStringLiteral();
         assertThat(stringLiteral, equalTo("你"));
     }
 
     @Test
-    public void testStringLiteralWithEscapedSurrogatePearOnBrace2() throws IOException {
+    public void testStringLiteralWithEscapedSurrogatePearOnBrace2() throws IOException, StaticSemanticsException {
         final CharArrayWriter caw = new CharArrayWriter();
         // type
         final String str = "\"" + "\\u{0074}\\u{0079}\\u{0070}\\u{0065}" + "\"";
         System.out.println(str);
         caw.write(str);
 
-        final TokenStream ts = new TokenStream(new Source(caw.toString()));
+        final TokenStream ts = new TokenStream(new Source(caw.toString()), "heep");
         assertThat(ts.scanToken(), is(Token.StringLiteral));
         assertThat(ts.asStringLiteral(), equalTo("type"));
     }
 
     @Test
-    public void testStringLiteralWithNonLATIN_1() {
-        final TokenStream ts = new TokenStream(new Source("\"あ\", \"〠\", \"〒\", \"〄\""));
+    public void testStringLiteralWithNonLATIN_1() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("\"あ\", \"〠\", \"〒\", \"〄\""), "heep");
         final Token hiraganaA = ts.scanToken();
         assertThat(hiraganaA, is(Token.StringLiteral));
         assertThat(ts.asStringLiteral(), equalTo("あ"));
@@ -521,8 +520,11 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testStringLiteralWithSurrogatePear() {
-        final TokenStream ts = new TokenStream(new Source("\"🂠\", \"🂡\", \"🂢\", \"🂣\", \"🂤\", \"🂥\", \"🂦\", \"🂧\", \"🂨\", \"🂩\", \"🂪\", \"🂫\", \"🂬\", \"🂭\", \"🂮\""));
+    public void testStringLiteralWithSurrogatePear() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(
+            new Source(
+                "\"🂠\", \"🂡\", \"🂢\", \"🂣\", \"🂤\", \"🂥\", \"🂦\", \"🂧\", \"🂨\", \"🂩\", \"🂪\", \"🂫\", \"🂬\", \"🂭\", \"🂮\""),
+            "heep");
 
         assertThat(ts.scanToken(), is(Token.StringLiteral));
         assertThat(ts.asStringLiteral(), equalTo("🂠"));
@@ -588,8 +590,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testUnionType() {
-        final TokenStream ts = new TokenStream(new Source("type E = (number);"));
+    public void testUnionType() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("type E = (number);"), "heep");
         assertThat(ts.scanToken(), is(Token.TypeOperator));
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("E"));
@@ -603,8 +605,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testUnionTypeAsEnum() {
-        final TokenStream ts = new TokenStream(new Source("type E = (number | string);"));
+    public void testUnionTypeAsEnum() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("type E = (number | string);"), "heep");
         assertThat(ts.scanToken(), is(Token.TypeOperator));
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("E"));
@@ -621,8 +623,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testUsePragma() {
-        final TokenStream ts = new TokenStream(new Source("use standard;"));
+    public void testUsePragma() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("use standard;"), "heep");
         assertThat(ts.scanToken(), is(Token.UsePragma));
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("standard"));
@@ -631,8 +633,8 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testVariableArrayType() {
-        final TokenStream ts = new TokenStream(new Source("type A = [...number];"));
+    public void testVariableArrayType() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(new Source("type A = [...number];"), "heep");
         assertThat(ts.scanToken(), is(Token.TypeOperator));
         assertThat(ts.scanToken(), is(Token.Identifier));
         assertThat(ts.asIdentifier(), equalTo("A"));
@@ -647,8 +649,11 @@ public class TokenStreamTest {
     }
 
     @Test
-    public void testWhitespace() {
-        final TokenStream ts = new TokenStream(new Source("\u0009\u000B\u000C\u0020\u00A0\uFEFF\u0020\u00A0\u1680\u180E\u202F\u205F\u3000\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A"));
+    public void testWhitespace() throws StaticSemanticsException {
+        final TokenStream ts = new TokenStream(
+            new Source(
+                "\u0009\u000B\u000C\u0020\u00A0\uFEFF\u0020\u00A0\u1680\u180E\u202F\u205F\u3000\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A"),
+            "heep");
         assertThat(ts.scanToken(), is(Token.Eof));
     }
 }

@@ -4,6 +4,8 @@
 
 package com.github.tasogare.json.ds.internal.ast;
 
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.synthetic.BasicTypeExpressionNode;
 import com.github.tasogare.json.ds.internal.ast.synthetic.LiteralNode;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
@@ -16,6 +18,7 @@ public class AnyTypeNode extends LiteralNode implements BasicTypeExpressionNode<
 
     /**
      * {@inheritDoc}
+     * 
      * @return AnyTypeNode型である自分自身
      * 
      */
@@ -30,7 +33,7 @@ public class AnyTypeNode extends LiteralNode implements BasicTypeExpressionNode<
     }
 
     @Override
-    public <R> R accept(NodeVisitor<R> visitor) {
+    public <R> R accept(NodeVisitor<R> visitor) throws RuntimeSemanticsException, StaticSemanticsException {
         return visitor.visit(this);
     }
 

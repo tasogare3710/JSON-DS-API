@@ -8,6 +8,7 @@ import com.github.tasogare.json.ds.parser.Parser;
 
 /**
  * このノードは{@literal ContextuallyReservedIdentifier}を表し{@link Parser}から生成される。
+ * 
  * @author tasogare
  *
  */
@@ -17,11 +18,11 @@ public class ContextuallyReservedIdentifierNode extends IdentifierNode {
         super(startPosition, endPosition, identifier);
     }
 
-    public boolean isStandard(){
+    public boolean isStandard() {
         return "standard".equals(getString());
     }
 
-    public boolean isStrict(){
+    public boolean isStrict() {
         return "strict".equals(getString());
     }
 }

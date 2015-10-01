@@ -35,7 +35,7 @@ public class StringLiteralNodeTest {
 
     @Test
     public void test() {
-        //"a"
+        // "a"
         final StringLiteralNode strLite = new StringLiteralNode(0, 3, "a");
         assertThat(strLite.getString(), equalTo("a"));
     }

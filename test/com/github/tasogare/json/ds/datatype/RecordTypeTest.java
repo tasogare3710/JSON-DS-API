@@ -121,7 +121,7 @@ public class RecordTypeTest {
         fields2.add(new RecordType.Field("b", anyType));
         final RecordType r2 = new RecordType(fields2);
 
-        //型が同じ場合対称性があるので
+        // 型が同じ場合対称性があるので
         assertTrue(r1.isTypeOf(r2));
         assertTrue(r2.isTypeOf(r1));
     }

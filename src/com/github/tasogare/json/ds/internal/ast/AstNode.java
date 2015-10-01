@@ -4,6 +4,8 @@
 
 package com.github.tasogare.json.ds.internal.ast;
 
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 
 /**
@@ -28,7 +30,7 @@ public abstract class AstNode implements Cloneable {
         return endPosition;
     }
 
-    public abstract <R> R accept(NodeVisitor<R> visitor);
+    public abstract <R> R accept(NodeVisitor<R> visitor) throws RuntimeSemanticsException, StaticSemanticsException;
 
     @Override
     protected Object clone() throws CloneNotSupportedException {

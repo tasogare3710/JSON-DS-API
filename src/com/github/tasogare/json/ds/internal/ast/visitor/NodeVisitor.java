@@ -4,6 +4,8 @@
 
 package com.github.tasogare.json.ds.internal.ast.visitor;
 
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.AnyTypeNode;
 import com.github.tasogare.json.ds.internal.ast.ArrayTypeNode;
 import com.github.tasogare.json.ds.internal.ast.AstNode;
@@ -26,40 +28,48 @@ import com.github.tasogare.json.ds.internal.ast.synthetic.FieldNameNode;
 
 /**
  * TODO Visitorの仕様が決まっていない
+ * 
  * @author tasogare
  *
  */
-public interface NodeVisitor<R>{
+public interface NodeVisitor<R> {
 
-    R visit(AnyTypeNode node);
+    R visit(AnyTypeNode node) throws StaticSemanticsException, RuntimeSemanticsException;
 
-    <T extends AstNode & BasicTypeExpressionNode<T>> R visit(ArrayTypeNode<T> node);
+    <T extends AstNode & BasicTypeExpressionNode<T>> R visit(ArrayTypeNode<T> node)
+            throws StaticSemanticsException, RuntimeSemanticsException;
 
-    R visit(FieldNameNode.StringLiteral node);
+    R visit(FieldNameNode.StringLiteral node) throws StaticSemanticsException, RuntimeSemanticsException;
 
-    <T extends AstNode & BasicTypeExpressionNode<T>> R visit(FieldTypeNode<T> node);
+    <T extends AstNode & BasicTypeExpressionNode<T>> R visit(FieldTypeNode<T> node)
+            throws StaticSemanticsException, RuntimeSemanticsException;
 
-    R visit(IdentifierNode node);
+    R visit(IdentifierNode node) throws StaticSemanticsException, RuntimeSemanticsException;
 
-    R visit(NameExpressionNode node);
+    R visit(NameExpressionNode node) throws StaticSemanticsException, RuntimeSemanticsException;
 
-    R visit(NullLiteralNode node);
+    R visit(NullLiteralNode node) throws StaticSemanticsException, RuntimeSemanticsException;
 
-    R visit(PragmaNode node);
+    R visit(PragmaNode node) throws StaticSemanticsException, RuntimeSemanticsException;
 
-    <D extends AstNode & DirectiveNode<D>> R visit(ProgramNode<D> node);
+    <D extends AstNode & DirectiveNode<D>> R visit(ProgramNode<D> node)
+            throws StaticSemanticsException, RuntimeSemanticsException;
 
-    <T extends AstNode & BasicTypeExpressionNode<T>> R visit(RecordTypeNode<T> node);
+    <T extends AstNode & BasicTypeExpressionNode<T>> R visit(RecordTypeNode<T> node)
+            throws StaticSemanticsException, RuntimeSemanticsException;
 
-    R visit(SemicolonNode node);
+    R visit(SemicolonNode node) throws StaticSemanticsException, RuntimeSemanticsException;
 
-    R visit(StringLiteralNode node);
+    R visit(StringLiteralNode node) throws StaticSemanticsException, RuntimeSemanticsException;
 
-    <T extends AstNode & BasicTypeExpressionNode<T>> R visit(TypeDefinitionNode<T> node);
+    <T extends AstNode & BasicTypeExpressionNode<T>> R visit(TypeDefinitionNode<T> node)
+            throws StaticSemanticsException, RuntimeSemanticsException;
 
-    <T extends AstNode & BasicTypeExpressionNode<T>> R visit(TypeExpressionNode<T> node);
+    <T extends AstNode & BasicTypeExpressionNode<T>> R visit(TypeExpressionNode<T> node)
+            throws StaticSemanticsException, RuntimeSemanticsException;
 
-    R visit(TypeNameNode node);
+    R visit(TypeNameNode node) throws StaticSemanticsException, RuntimeSemanticsException;
 
-    <T extends AstNode & BasicTypeExpressionNode<T>> R visit(UnionTypeNode<T> node);
+    <T extends AstNode & BasicTypeExpressionNode<T>> R visit(UnionTypeNode<T> node)
+            throws StaticSemanticsException, RuntimeSemanticsException;
 }

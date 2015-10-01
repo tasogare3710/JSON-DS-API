@@ -35,9 +35,9 @@ public class TypeDefinitionNodeTest {
 
     @Test
     public void test() {
-        //"type A = string;"
+        // "type A = string;"
         final IdentifierNode A = new IdentifierNode(0, 6, "A");
-        
+
         final TypeExpressionNode<TypeNameNode> init = new TypeExpressionNode<>(9, 15, newTypeName(9, 15, "string"));
         final TypeDefinitionNode<TypeNameNode> def = new TypeDefinitionNode<>(0, 15, A, init);
 

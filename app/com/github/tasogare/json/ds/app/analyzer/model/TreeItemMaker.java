@@ -4,8 +4,9 @@
 
 package com.github.tasogare.json.ds.app.analyzer.model;
 
-import com.github.tasogare.json.ds.JsonDsException;
-import com.github.tasogare.json.ds.JsonDsException.StandardErrors;
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.RuntimeSemanticsException.StandardErrors;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.AnyTypeNode;
 import com.github.tasogare.json.ds.internal.ast.ArrayTypeNode;
 import com.github.tasogare.json.ds.internal.ast.AstNode;
@@ -59,9 +60,11 @@ public class TreeItemMaker implements NodeVisitor<TreeItem<String>> {
     }
 
     @Override
-    public <T extends AstNode & BasicTypeExpressionNode<T>> TreeItem<String> visit(ArrayTypeNode<T> node) {
+    public <T extends AstNode & BasicTypeExpressionNode<T>> TreeItem<String> visit(ArrayTypeNode<T> node)
+        throws StaticSemanticsException
+    {
         final TreeItem<String> array = new TreeItem<>("", new ImageView(arrayImage));
-        for(final TypeExpressionNode<T> e : node.getElementTypeList()){
+        for (final TypeExpressionNode<T> e : node.getElementTypeList()) {
             array.getChildren().add(e.accept(this));
         }
         final TypeExpressionNode<T> vaTypes = node.getVariableArrayType();
@@ -77,8 +80,10 @@ public class TreeItemMaker implements NodeVisitor<TreeItem<String>> {
     }
 
     @Override
-    public <T extends AstNode & BasicTypeExpressionNode<T>> TreeItem<String> visit(FieldTypeNode<T> node) {
-        final TreeItem<String> name = ((FieldNameNode.StringLiteral)node.getName()).accept(this);
+    public <T extends AstNode & BasicTypeExpressionNode<T>> TreeItem<String> visit(FieldTypeNode<T> node)
+        throws RuntimeSemanticsException, StaticSemanticsException
+    {
+        final TreeItem<String> name = ((FieldNameNode.StringLiteral) node.getName()).accept(this);
         final TreeItem<String> type = node.getType().accept(this);
         final TreeItem<String> field = new TreeItem<>(name.getValue());
         field.getChildren().add(type);
@@ -101,10 +106,10 @@ public class TreeItemMaker implements NodeVisitor<TreeItem<String>> {
     }
 
     @Override
-    public TreeItem<String> visit(PragmaNode node) {
+    public TreeItem<String> visit(PragmaNode node) throws RuntimeSemanticsException, StaticSemanticsException {
         switch (node.getName()) {
         case "use":
-            for (final IdentifierNode iden : node.<IdentifierNode> getPragmaItems()) {
+            for (final IdentifierNode iden : node. <IdentifierNode> getPragmaItems()) {
                 if (iden instanceof ContextuallyReservedIdentifierNode) {
                     if (((ContextuallyReservedIdentifierNode) iden).isStandard()) {
                         TreeItem<String> use = new TreeItem<>("use", new ImageView(pragmaImage));
@@ -113,11 +118,11 @@ public class TreeItemMaker implements NodeVisitor<TreeItem<String>> {
                     }
                 }
             }
-            throw new JsonDsException("standard variantのみ利用できます", StandardErrors.SyntaxError);
+            throw new RuntimeSemanticsException("standard variantのみ利用できます", StandardErrors.InternalError);
         case "include":
-            //XXX: 今のところincludeされるパスを表示するだけ
+            // 今のところincludeされるパスを表示するだけ
             TreeItem<String> include = new TreeItem<>("include", new ImageView(pragmaImage));
-            final StringLiteralNode strLit = node.<StringLiteralNode> getPragmaItems().get(0);
+            final StringLiteralNode strLit = node. <StringLiteralNode> getPragmaItems().get(0);
             include.getChildren().add(strLit.accept(this));
             return include;
         default:
@@ -126,25 +131,29 @@ public class TreeItemMaker implements NodeVisitor<TreeItem<String>> {
     }
 
     @Override
-    public <D extends AstNode & DirectiveNode<D>> TreeItem<String> visit(ProgramNode<D> node) {
-        if(node.getPragmas().isEmpty()){
-            throw new JsonDsException("Useプラグマがありません", StandardErrors.SyntaxError);
+    public <D extends AstNode & DirectiveNode<D>> TreeItem<String> visit(ProgramNode<D> node)
+        throws RuntimeSemanticsException, StaticSemanticsException
+    {
+        if (node.getPragmas().isEmpty()) {
+            throw new RuntimeSemanticsException("Useプラグマがありません", StandardErrors.InternalError);
         }
 
         final TreeItem<String> schema = new TreeItem<>(sourceName);
-        for(final PragmaNode p : node.getPragmas()){
+        for (final PragmaNode p : node.getPragmas()) {
             schema.getChildren().add(p.accept(this));
         }
-        for(final D d : node.getDirectives()){
+        for (final D d : node.getDirectives()) {
             schema.getChildren().add(d.accept(this));
         }
         return schema;
     }
 
     @Override
-    public <T extends AstNode & BasicTypeExpressionNode<T>> TreeItem<String> visit(RecordTypeNode<T> node) {
+    public <T extends AstNode & BasicTypeExpressionNode<T>> TreeItem<String> visit(RecordTypeNode<T> node)
+        throws RuntimeSemanticsException, StaticSemanticsException
+    {
         final TreeItem<String> record = new TreeItem<>("", new ImageView(recordImage));
-        for(final FieldTypeNode<T> f : node.getFieldTypeList()){
+        for (final FieldTypeNode<T> f : node.getFieldTypeList()) {
             record.getChildren().add(f.accept(this));
         }
         return record;
@@ -161,7 +170,9 @@ public class TreeItemMaker implements NodeVisitor<TreeItem<String>> {
     }
 
     @Override
-    public <T extends AstNode & BasicTypeExpressionNode<T>> TreeItem<String> visit(TypeDefinitionNode<T> node) {
+    public <T extends AstNode & BasicTypeExpressionNode<T>> TreeItem<String> visit(TypeDefinitionNode<T> node)
+        throws StaticSemanticsException
+    {
         final TreeItem<String> type = node.getIdentifier().accept(this);
         final TreeItem<String> init = node.getTypeInitialization().accept(this);
         type.getChildren().add(init);
@@ -169,7 +180,9 @@ public class TreeItemMaker implements NodeVisitor<TreeItem<String>> {
     }
 
     @Override
-    public <T extends AstNode & BasicTypeExpressionNode<T>> TreeItem<String> visit(TypeExpressionNode<T> node) {
+    public <T extends AstNode & BasicTypeExpressionNode<T>> TreeItem<String> visit(TypeExpressionNode<T> node)
+        throws RuntimeSemanticsException, StaticSemanticsException
+    {
         final T bte = node.getBasicTypeExpression();
         final TreeItem<String> b = bte.accept(this);
 
@@ -188,15 +201,17 @@ public class TreeItemMaker implements NodeVisitor<TreeItem<String>> {
     }
 
     @Override
-    public TreeItem<String> visit(TypeNameNode node) {
+    public TreeItem<String> visit(TypeNameNode node) throws RuntimeSemanticsException, StaticSemanticsException {
         final TreeItem<String> ne = node.getNameExpression().accept(this);
         return ne;
     }
 
     @Override
-    public <T extends AstNode & BasicTypeExpressionNode<T>> TreeItem<String> visit(UnionTypeNode<T> node) {
+    public <T extends AstNode & BasicTypeExpressionNode<T>> TreeItem<String> visit(UnionTypeNode<T> node)
+        throws StaticSemanticsException
+    {
         final TreeItem<String> union = new TreeItem<>("", new ImageView(unionImage));
-        for(final TypeExpressionNode<T> te : node.getTypeUnionList()){
+        for (final TypeExpressionNode<T> te : node.getTypeUnionList()) {
             union.getChildren().add(te.accept(this));
         }
         return union;

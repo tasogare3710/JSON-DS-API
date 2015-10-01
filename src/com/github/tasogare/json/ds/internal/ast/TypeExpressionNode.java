@@ -4,6 +4,7 @@
 
 package com.github.tasogare.json.ds.internal.ast;
 
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.synthetic.BasicTypeExpressionNode;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 
@@ -34,8 +35,8 @@ public class TypeExpressionNode<T extends AstNode & BasicTypeExpressionNode<T>> 
      *             {@code nullable}が{@code false}で{@code basicType}が
      *             {@link NullLiteralNode}のとき。
      */
-    public TypeExpressionNode(final long startPosition, final long endPosition, final T basicType, final boolean nullable)
-            throws IllegalArgumentException
+    public TypeExpressionNode(final long startPosition, final long endPosition, final T basicType,
+        final boolean nullable) throws IllegalArgumentException
     {
         this(startPosition, endPosition, basicType, nullable ? Nullability.Nullable : Nullability.NonNullable);
     }
@@ -60,8 +61,8 @@ public class TypeExpressionNode<T extends AstNode & BasicTypeExpressionNode<T>> 
      *             {@code nullability}が{@link Nullability#NonNullable}で
      *             {@code basicType}が{@link NullLiteralNode}のとき。
      */
-    public TypeExpressionNode(final long startPosition, final long endPosition, final T basicType, final Nullability nullability)
-            throws IllegalArgumentException
+    public TypeExpressionNode(final long startPosition, final long endPosition, final T basicType,
+        final Nullability nullability) throws IllegalArgumentException
     {
         super(startPosition, endPosition);
         if (nullability == Nullability.NonNullable && basicType instanceof NullLiteralNode) {
@@ -72,12 +73,12 @@ public class TypeExpressionNode<T extends AstNode & BasicTypeExpressionNode<T>> 
     }
 
     @Override
-    public <R> R accept(NodeVisitor<R> visitor) {
+    public <R> R accept(NodeVisitor<R> visitor) throws StaticSemanticsException {
         // 明示的に指定するとBasicTypeExpressionクラスのTになって
         // 型推論するとvisitメソッドのTになるがどちらも定義が同じなので
         // どちらでも構わないが、将来特殊化が実装された時も
         // 型推論できるか分からないので指定しておく。
-        return visitor.<T>visit(this);
+        return visitor. <T> visit(this);
     }
 
     public final T getBasicTypeExpression() {

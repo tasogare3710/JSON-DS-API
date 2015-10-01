@@ -20,8 +20,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import com.github.tasogare.json.ds.JsonDsException;
-import com.github.tasogare.json.ds.JsonDsException.StandardErrors;
+import javax.json.JsonValue;
+
+import com.github.tasogare.json.ds.MetaObject;
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.RuntimeSemanticsException.StandardErrors;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.datatype.AnyType;
 import com.github.tasogare.json.ds.datatype.ArrayType;
 import com.github.tasogare.json.ds.datatype.RecordType;
@@ -49,14 +53,14 @@ import com.github.tasogare.json.ds.internal.ast.synthetic.DirectiveNode;
 import com.github.tasogare.json.ds.internal.ast.synthetic.FieldNameNode;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 import com.github.tasogare.json.ds.parser.Parser;
-import com.github.tasogare.json.ds.parser.ParserException;
 import com.github.tasogare.json.ds.parser.Source;
 import com.github.tasogare.json.ds.parser.TokenStream;
 
 /**
- * non-hositable版のプロセッサ　テスト・ドライバの実装
+ * non-hositable版のプロセッサ テスト・ドライバの実装
  * 
  * とくに説明がない限りこのクラスのメソッドは戻り値が必要ないメソッドは{@code null}を返します。
+ * 
  * @author tasogare
  *
  */
@@ -64,9 +68,9 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
 
     protected Mode complianceMode;
     protected URL sourceName;
-    private final JsonMetaObjectTestDriver metaObjects;
+    private final MetaObject<JsonValue> metaObjects;
 
-    public JsonDsProcessorTestDriver(JsonMetaObjectTestDriver metaObjects) {
+    public JsonDsProcessorTestDriver(MetaObject<JsonValue> metaObjects) {
         this.metaObjects = metaObjects;
     }
 
@@ -80,9 +84,11 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
     }
 
     @Override
-    public <T extends AstNode & BasicTypeExpressionNode<T>> Type visit(ArrayTypeNode<T> node) {
+    public <T extends AstNode & BasicTypeExpressionNode<T>> Type visit(ArrayTypeNode<T> node)
+        throws StaticSemanticsException
+    {
         final ArrayList<Type> fixedLengthElements = new ArrayList<>();
-        for(final TypeExpressionNode<T> e : node.getElementTypeList()){
+        for (final TypeExpressionNode<T> e : node.getElementTypeList()) {
             fixedLengthElements.add(e.accept(this));
         }
         final TypeExpressionNode<T> vaTypes = node.getVariableArrayType();
@@ -100,8 +106,10 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
     }
 
     @Override
-    public <T extends AstNode & BasicTypeExpressionNode<T>> Type visit(FieldTypeNode<T> node) {
-        final String name = ((FieldNameNode.StringLiteral)node.getName()).getString();
+    public <T extends AstNode & BasicTypeExpressionNode<T>> Type visit(FieldTypeNode<T> node)
+        throws StaticSemanticsException
+    {
+        final String name = ((FieldNameNode.StringLiteral) node.getName()).getString();
         final Type type = node.getType().accept(this);
         final RecordType.Field field = new RecordType.Field(name, type);
         return field;
@@ -125,10 +133,10 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
     }
 
     @Override
-    public Type visit(PragmaNode node) {
+    public Type visit(PragmaNode node) throws RuntimeSemanticsException, StaticSemanticsException {
         switch (node.getName()) {
         case "use":
-            for (final IdentifierNode iden : node.<IdentifierNode> getPragmaItems()) {
+            for (final IdentifierNode iden : node. <IdentifierNode> getPragmaItems()) {
                 if (iden instanceof ContextuallyReservedIdentifierNode) {
                     if (((ContextuallyReservedIdentifierNode) iden).isStandard()) {
                         complianceMode = Mode.Standard;
@@ -136,29 +144,29 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
                     }
                 }
             }
-            throw new JsonDsException("standard variantのみ利用できます", StandardErrors.SyntaxError);
+            // XXX: モードの指定がないとエラーになる挙動は今はまだ仕様ではない
+            throw new RuntimeSemanticsException("standard variantのみ利用できます", StandardErrors.InternalError);
         case "include":
-            System.err.println("warning: include pragma TBD");
             if (sourceName != null) {
                 final URI baseUri;
                 try {
                     baseUri = new URI(sourceName.toString());
                 } catch (URISyntaxException e) {
-                    throw new JsonDsException(sourceName.toString(), e, StandardErrors.URIError);
+                    throw new RuntimeSemanticsException(sourceName.toString(), e, StandardErrors.URIError);
                 }
                 // include pragmaのitemは一つのみ許されるのでPragmaNode#getPragmaItems()は一つの要素を持ったListになる
-                final URI includeUri = baseUri.resolve(node.<StringLiteralNode> getPragmaItems().get(0).getString());
+                final URI includeUri = baseUri.resolve(node. <StringLiteralNode> getPragmaItems().get(0).getString());
                 final JsonDsProcessorTestDriver nested = new JsonDsProcessorTestDriver(getMetaObjects());
                 try (final InputStreamReader r = new InputStreamReader(includeUri.toURL().openStream())) {
                     nested.process(r, includeUri.toURL());
                 } catch (MalformedURLException e) {
-                    throw new JsonDsException(includeUri.toString(), e, StandardErrors.URIError);
+                    throw new RuntimeSemanticsException(includeUri.toString(), e, StandardErrors.URIError);
                 } catch (IOException | IllegalArgumentException e) {
-                    throw new JsonDsException(includeUri.toString(), e, StandardErrors.InternalError);
+                    throw new RuntimeSemanticsException(includeUri.toString(), e, StandardErrors.InternalError);
                 }
                 return null;
             } else {
-                throw new JsonDsException("base URI is null", StandardErrors.URIError);
+                throw new RuntimeSemanticsException("base URI is null", StandardErrors.URIError);
             }
         default:
             throw new AssertionError();
@@ -166,23 +174,28 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
     }
 
     @Override
-    public <D extends AstNode & DirectiveNode<D>> Type visit(ProgramNode<D> node) {
-        if(node.getPragmas().isEmpty()){
-            throw new JsonDsException("Useプラグマがありません", StandardErrors.SyntaxError);
+    public <D extends AstNode & DirectiveNode<D>> Type visit(ProgramNode<D> node)
+        throws RuntimeSemanticsException, StaticSemanticsException
+    {
+        if (node.getPragmas().isEmpty()) {
+            // XXX: モードの指定がないとエラーになる挙動は今はまだ仕様ではない
+            throw new RuntimeSemanticsException("Useプラグマがありません", StandardErrors.InternalError);
         }
-        for(final PragmaNode p : node.getPragmas()){
+        for (final PragmaNode p : node.getPragmas()) {
             p.accept(this);
         }
-        for(final D d : node.getDirectives()){
+        for (final D d : node.getDirectives()) {
             d.accept(this);
         }
         return null;
     }
 
     @Override
-    public <T extends AstNode & BasicTypeExpressionNode<T>> Type visit(RecordTypeNode<T> node) {
+    public <T extends AstNode & BasicTypeExpressionNode<T>> Type visit(RecordTypeNode<T> node)
+        throws RuntimeSemanticsException, StaticSemanticsException
+    {
         HashSet<RecordType.Field> fields = new HashSet<>();
-        for(final FieldTypeNode<T> f : node.getFieldTypeList()){
+        for (final FieldTypeNode<T> f : node.getFieldTypeList()) {
             fields.add((RecordType.Field) f.accept(this));
         }
         return new RecordType(fields);
@@ -205,7 +218,9 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
     }
 
     @Override
-    public <T extends AstNode & BasicTypeExpressionNode<T>> Type visit(TypeDefinitionNode<T> node) {
+    public <T extends AstNode & BasicTypeExpressionNode<T>> Type visit(TypeDefinitionNode<T> node)
+        throws StaticSemanticsException
+    {
         node.getIdentifier().accept(this);
         Type init = node.getTypeInitialization().accept(this);
         metaObjects.registerMetaObject(node.getIdentifier().getString(), init);
@@ -213,7 +228,9 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
     }
 
     @Override
-    public <T extends AstNode & BasicTypeExpressionNode<T>> Type visit(TypeExpressionNode<T> node) {
+    public <T extends AstNode & BasicTypeExpressionNode<T>> Type visit(TypeExpressionNode<T> node)
+        throws RuntimeSemanticsException, StaticSemanticsException
+    {
         final T bte = node.getBasicTypeExpression();
         final Type b = bte.accept(this);
 
@@ -230,39 +247,41 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
     }
 
     @Override
-    public Type visit(TypeNameNode node) {
+    public Type visit(TypeNameNode node) throws RuntimeSemanticsException, StaticSemanticsException {
         final Type metaObject = node.getNameExpression().accept(this);
-        if(metaObject == null){
-            throw new JsonDsException(node.getString() + "が未定義です", StandardErrors.ReferenceError);
+        if (metaObject == null) {
+            throw new RuntimeSemanticsException(node.getString() + "が未定義です", StandardErrors.ReferenceError);
         }
         return metaObject;
     }
 
     @Override
-    public <T extends AstNode & BasicTypeExpressionNode<T>> Type visit(UnionTypeNode<T> node) {
+    public <T extends AstNode & BasicTypeExpressionNode<T>> Type visit(UnionTypeNode<T> node)
+        throws StaticSemanticsException
+    {
         HashSet<Type> members = new HashSet<>();
-        for(final TypeExpressionNode<T> te : node.getTypeUnionList()){
+        for (final TypeExpressionNode<T> te : node.getTypeUnionList()) {
             members.add(te.accept(this));
         }
         return new UnionType(members);
     }
 
     @Override
-    public void process(String jsds, URL sourceName) throws ParserException, JsonDsException {
+    public void process(String jsds, URL sourceName) throws RuntimeSemanticsException, StaticSemanticsException {
         final Source source = new Source(jsds);
         processImpl(source, sourceName);
     }
 
     @Override
-    public void process(Reader jsds, URL sourceName) throws ParserException, JsonDsException {
+    public void process(Reader jsds, URL sourceName) throws RuntimeSemanticsException, StaticSemanticsException {
         final Source source = new Source(jsds);
         processImpl(source, sourceName);
     }
 
-    protected void processImpl(final Source source, URL sourceName) throws ParserException, JsonDsException {
+    protected void processImpl(final Source source, URL sourceName) throws RuntimeSemanticsException, StaticSemanticsException {
         this.sourceName = sourceName;
-        final TokenStream ts = new TokenStream(source);
-        final Parser parser = new Parser(ts, sourceName != null ? sourceName.toString() : "");
+        final TokenStream ts = new TokenStream(source, sourceName != null ? sourceName.toString() : "");
+        final Parser parser = new Parser(ts);
         final ProgramNode<?> p = parser.parse();
         visit(p);
     }
@@ -275,7 +294,8 @@ public class JsonDsProcessorTestDriver implements NodeVisitor<Type>, DatatypeSch
         return complianceMode;
     }
 
-    public final JsonMetaObjectTestDriver getMetaObjects() {
+    @Override
+    public final MetaObject<JsonValue> getMetaObjects() {
         return metaObjects;
     }
 

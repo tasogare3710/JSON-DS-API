@@ -39,7 +39,7 @@ public class IdentifierTest {
     }
 
     @Test
-    public void testIsIdentifierPartOtherSupported(){
+    public void testIsIdentifierPartOtherSupported() {
         assertTrue(Source.isIdentifierPart('\u00B7'));
         assertTrue(Source.isIdentifierPart('\u0387'));
         assertTrue(Source.isIdentifierPart('\u1369'));

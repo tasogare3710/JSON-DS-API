@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.synthetic.BasicTypeExpressionNode;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 
@@ -18,30 +20,37 @@ import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
  * 
  * @author tasogare
  *
- * @param <T> 要素の型
+ * @param <T>
+ *            要素の型
  */
-public class UnionTypeNode<T extends AstNode & BasicTypeExpressionNode<T>> extends AstNode implements BasicTypeExpressionNode<UnionTypeNode<T>>, Cloneable {
+public class UnionTypeNode<T extends AstNode & BasicTypeExpressionNode<T>> extends AstNode
+        implements BasicTypeExpressionNode<UnionTypeNode<T>>, Cloneable {
 
     private final List<TypeExpressionNode<T>> typeUnionList;
 
     /**
      * contains typeUnionList UnionTypeNode
+     * 
      * @param startPosition
      * @param endPosition
      * @param typeUnionList
      */
-    public UnionTypeNode(final long startPosition, final long endPosition, final List<TypeExpressionNode<T>> typeUnionList) {
+    public UnionTypeNode(final long startPosition, final long endPosition,
+        final List<TypeExpressionNode<T>> typeUnionList)
+    {
         super(startPosition, endPosition);
-        this.typeUnionList = typeUnionList == null ? null : Collections.unmodifiableList(new ArrayList<TypeExpressionNode<T>>(typeUnionList));
+        this.typeUnionList = typeUnionList == null ? null
+            : Collections.unmodifiableList(new ArrayList<TypeExpressionNode<T>>(typeUnionList));
     }
 
     /**
      * empty UnionTypeNode
+     * 
      * @param startPosition
      * @param endPosition
      */
-    public UnionTypeNode(final long startPosition, final long endPosition){
-        this(startPosition, endPosition, Collections.<TypeExpressionNode<T>>emptyList());
+    public UnionTypeNode(final long startPosition, final long endPosition) {
+        this(startPosition, endPosition, Collections. <TypeExpressionNode<T>> emptyList());
     }
 
     /**
@@ -55,15 +64,15 @@ public class UnionTypeNode<T extends AstNode & BasicTypeExpressionNode<T>> exten
     }
 
     @Override
-    public <R> R accept(NodeVisitor<R> visitor) {
-        return visitor.<T>visit(this);
+    public <R> R accept(NodeVisitor<R> visitor) throws RuntimeSemanticsException, StaticSemanticsException {
+        return visitor. <T> visit(this);
     }
 
     public final List<TypeExpressionNode<T>> getTypeUnionList() {
         return typeUnionList;
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return typeUnionList.isEmpty();
     }
 

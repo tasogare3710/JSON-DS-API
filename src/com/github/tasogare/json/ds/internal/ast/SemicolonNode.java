@@ -4,18 +4,21 @@
 
 package com.github.tasogare.json.ds.internal.ast;
 
+import com.github.tasogare.json.ds.RuntimeSemanticsException;
+import com.github.tasogare.json.ds.StaticSemanticsException;
 import com.github.tasogare.json.ds.internal.ast.visitor.NodeVisitor;
 
 public class SemicolonNode extends AstNode implements Cloneable {
 
     private final boolean virtual;
+
     public SemicolonNode(final long startPosition, final long endPosition, final boolean virtual) {
         super(startPosition, endPosition);
         this.virtual = virtual;
     }
 
     @Override
-    public <R> R accept(NodeVisitor<R> visitor) {
+    public <R> R accept(NodeVisitor<R> visitor) throws RuntimeSemanticsException, StaticSemanticsException {
         return visitor.visit(this);
     }
 

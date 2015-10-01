@@ -52,7 +52,7 @@ public class JsonMetaObjectTest {
     public void test1() throws IOException {
         final JsonMetaObjectTestDriver metaObject = new JsonMetaObjectTestDriver();
         final String name = "com/github/tasogare/json/ds/datatype/resources/test1.json";
-        try(final JsonReader json = Json.createReader(newReader(name, getClass()))){
+        try (final JsonReader json = Json.createReader(newReader(name, getClass()))) {
             final JsonStructure value = json.read();
             final ArrayType test = new ArrayType(stringType);
             assertTrue(metaObject.is(value, test));
@@ -71,7 +71,7 @@ public class JsonMetaObjectTest {
     public void test2() throws IOException {
         final JsonMetaObjectTestDriver metaObject = new JsonMetaObjectTestDriver();
         final String name = "com/github/tasogare/json/ds/datatype/resources/test1.json";
-        try(final JsonReader json = Json.createReader(newReader(name, getClass()))){
+        try (final JsonReader json = Json.createReader(newReader(name, getClass()))) {
             final JsonStructure value = json.read();
             final ArrayType test = new ArrayType(Arrays.asList(stringType, stringType, stringType));
             assertTrue(metaObject.is(value, test));
@@ -84,7 +84,7 @@ public class JsonMetaObjectTest {
     public void test3() throws IOException {
         final JsonMetaObjectTestDriver metaObject = new JsonMetaObjectTestDriver();
         final String name = "com/github/tasogare/json/ds/datatype/resources/mixed.json";
-        try(final JsonReader json = Json.createReader(newReader(name, getClass()))){
+        try (final JsonReader json = Json.createReader(newReader(name, getClass()))) {
             final JsonStructure value = json.read();
             final ArrayType test = new ArrayType(Arrays.asList(numberType, stringType, booleanType), numberType);
             assertTrue(metaObject.is(value, test));
@@ -101,7 +101,7 @@ public class JsonMetaObjectTest {
     public void test4() throws IOException {
         final JsonMetaObjectTestDriver metaObject = new JsonMetaObjectTestDriver();
         final String name = "com/github/tasogare/json/ds/datatype/resources/mixed.json";
-        try(final JsonReader json = Json.createReader(newReader(name, getClass()))){
+        try (final JsonReader json = Json.createReader(newReader(name, getClass()))) {
             final JsonStructure value = json.read();
             final ArrayType test = new ArrayType(anyType);
             assertTrue(metaObject.is(value, test));
@@ -111,23 +111,22 @@ public class JsonMetaObjectTest {
 
     @Test
     public void testUnionTypedJsonInArray() throws IOException {
-        //type r = {a: boolean, b: string}
+        // type r = {a: boolean, b: string}
         final HashSet<RecordType.Field> fields = new HashSet<>();
         fields.add(new RecordType.Field("a", booleanType));
         fields.add(new RecordType.Field("b", stringType));
         final RecordType R = new RecordType(fields);
 
-        //type a = [string]
-        //type u1 = (a | r);
+        // type a = [string]
+        // type u1 = (a | r);
         final HashSet<Type> members = new HashSet<>();
         final ArrayType A = new ArrayType(stringType);
         members.addAll(Arrays.asList(A, R));
         final UnionType test = new UnionType(members);
 
-
         final JsonMetaObjectTestDriver metaObject = new JsonMetaObjectTestDriver();
         final String name = "com/github/tasogare/json/ds/datatype/resources/UnionTypedJsonInArray.json";
-        try(final JsonReader json = Json.createReader(newReader(name, getClass()))){
+        try (final JsonReader json = Json.createReader(newReader(name, getClass()))) {
             final JsonStructure value = json.read();
             assertTrue(metaObject.is(value, test));
             assertTrue(metaObject.is(value, anyType));
@@ -137,23 +136,22 @@ public class JsonMetaObjectTest {
 
     @Test
     public void testUnionTypedJsonInObject() throws IOException {
-        //type r = {a: boolean, b: string}
+        // type r = {a: boolean, b: string}
         final HashSet<RecordType.Field> fields = new HashSet<>();
         fields.add(new RecordType.Field("a", booleanType));
         fields.add(new RecordType.Field("b", stringType));
         final RecordType R = new RecordType(fields);
 
-        //type a = [string]
-        //type u1 = (a | r);
+        // type a = [string]
+        // type u1 = (a | r);
         final HashSet<Type> members = new HashSet<>();
         final ArrayType A = new ArrayType(stringType);
         members.addAll(Arrays.asList(A, R));
         final UnionType test = new UnionType(members);
 
-
         final JsonMetaObjectTestDriver metaObject = new JsonMetaObjectTestDriver();
         final String name = "com/github/tasogare/json/ds/datatype/resources/UnionTypedJsonInObject.json";
-        try(final JsonReader json = Json.createReader(newReader(name, getClass()))){
+        try (final JsonReader json = Json.createReader(newReader(name, getClass()))) {
             final JsonStructure value = json.read();
             assertTrue(metaObject.is(value, test));
             assertTrue(metaObject.is(value, anyType));

@@ -17,7 +17,7 @@ import org.junit.Test;
  * @author tasogare
  *
  */
-public class ArrayTypeTest{
+public class ArrayTypeTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -36,7 +36,7 @@ public class ArrayTypeTest{
     }
 
     @Test
-    public void test1(){
+    public void test1() {
         // type a1 = [string, string];
         ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.stringType));
         // type a2 = [...string];
@@ -45,7 +45,7 @@ public class ArrayTypeTest{
     }
 
     @Test
-    public void test2(){
+    public void test2() {
         // type a1 = [string, string];
         ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.stringType));
         // type a2 = [string, ...string];
@@ -54,7 +54,7 @@ public class ArrayTypeTest{
     }
 
     @Test
-    public void test3(){
+    public void test3() {
         // type a1 = [string];
         ArrayType a1 = new ArrayType(asList(Intrinsics.stringType));
         // type a2 = [string, ...string];
@@ -63,7 +63,7 @@ public class ArrayTypeTest{
     }
 
     @Test
-    public void test4(){
+    public void test4() {
         // type a1 = [string, ...string];
         ArrayType a1 = new ArrayType(asList(Intrinsics.stringType), Intrinsics.stringType);
         // type a2 = [string, string, string];
@@ -72,11 +72,12 @@ public class ArrayTypeTest{
     }
 
     @Test
-    public void test5(){
+    public void test5() {
         // type a1 = [string, ...string];
         ArrayType a1 = new ArrayType(asList(Intrinsics.stringType), Intrinsics.stringType);
         // type a2 = [string, string, string, ...string];
-        ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.stringType, Intrinsics.stringType), Intrinsics.stringType);
+        ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.stringType, Intrinsics.stringType),
+            Intrinsics.stringType);
         assertTrue(a1.isTypeOf(a2));
     }
 
@@ -84,7 +85,7 @@ public class ArrayTypeTest{
      * 空同士
      */
     @Test
-    public void test6(){
+    public void test6() {
         // type a1 = [];
         ArrayType a1 = new ArrayType();
         // type a2 = [];
@@ -96,7 +97,7 @@ public class ArrayTypeTest{
      * @see NominalType#isTypeOf(Type)
      */
     @Test
-    public void test7(){
+    public void test7() {
         // type a1 = [string];
         ArrayType a1 = new ArrayType(Intrinsics.stringType);
         // type a2 = [*];
@@ -105,7 +106,7 @@ public class ArrayTypeTest{
     }
 
     @Test
-    public void test8(){
+    public void test8() {
         // type a1 = [*];
         ArrayType a1 = new ArrayType(Intrinsics.anyType);
         // type a2 = [string];
@@ -114,7 +115,7 @@ public class ArrayTypeTest{
     }
 
     @Test
-    public void test9(){
+    public void test9() {
         // type a1 = [string, number, boolean];
         ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType));
         // type a2 = [string, number, boolean];
@@ -123,65 +124,76 @@ public class ArrayTypeTest{
     }
 
     @Test
-    public void test10(){
+    public void test10() {
         // type a1 = [string, number, boolean];
         ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType));
         // type a2 = [string, number, boolean, ...string];
-        ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType), Intrinsics.stringType);
+        ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType),
+            Intrinsics.stringType);
         assertTrue(a1.isTypeOf(a2));
     }
 
     @Test
-    public void test11(){
+    public void test11() {
         // type a1 = [string, number, boolean, ...string];
-        ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType), Intrinsics.stringType);
+        ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType),
+            Intrinsics.stringType);
         // type a2 = [string, number, boolean];
         ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType));
         assertTrue(a1.isTypeOf(a2));
     }
 
     @Test
-    public void test12(){
+    public void test12() {
         // type a1 = [string, number, boolean, ...string];
-        ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType), Intrinsics.stringType);
+        ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType),
+            Intrinsics.stringType);
         // type a2 = [string, number, boolean, string];
-        ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType, Intrinsics.stringType));
+        ArrayType a2 = new ArrayType(
+            asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType, Intrinsics.stringType));
         assertTrue(a1.isTypeOf(a2));
     }
 
     @Test
-    public void test13(){
+    public void test13() {
         // type a1 = [string, number, boolean, string];
-        ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType, Intrinsics.stringType));
+        ArrayType a1 = new ArrayType(
+            asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType, Intrinsics.stringType));
         // type a2 = [string, number, boolean, ...string];
-        ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType), Intrinsics.stringType);
+        ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType),
+            Intrinsics.stringType);
         assertTrue(a1.isTypeOf(a2));
     }
 
     @Test
-    public void test14(){
+    public void test14() {
         // type a1 = [string, number, boolean];
         ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType));
         // type a2 = [string, number, boolean, ...*];
-        ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType), Intrinsics.anyType);
+        ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType),
+            Intrinsics.anyType);
         assertTrue(a1.isTypeOf(a2));
     }
 
     @Test
-    public void test15(){
+    public void test15() {
         // type a1 = [string, number, boolean, ...*];
-        ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType), Intrinsics.anyType);
+        ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType),
+            Intrinsics.anyType);
         // type a2 = [string, number, boolean];
         ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType));
         assertTrue(a1.isTypeOf(a2));
     }
 
     @Test
-    public void test16(){
+    public void test16() {
         // type a1 = [string, number, boolean, string, ...string];
-        ArrayType a1 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType, Intrinsics.stringType), Intrinsics.stringType);
+        ArrayType a1 = new ArrayType(
+            asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType, Intrinsics.stringType),
+            Intrinsics.stringType);
         // type a2 = [string, number, boolean, ...string];
-        ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType), Intrinsics.stringType);
+        ArrayType a2 = new ArrayType(asList(Intrinsics.stringType, Intrinsics.numberType, Intrinsics.booleanType),
+            Intrinsics.stringType);
         assertTrue(a1.isTypeOf(a2));
     }
 }

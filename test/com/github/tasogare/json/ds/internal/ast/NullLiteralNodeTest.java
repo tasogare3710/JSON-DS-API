@@ -37,7 +37,7 @@ public class NullLiteralNodeTest {
 
     @Test
     public void test() {
-        //"null"
+        // "null"
         final NullLiteralNode nullLite = new NullLiteralNode(0, 4);
         assertThat(nullLite, notNullValue());
         assertThat(nullLite.getBasicTypeExpression(), is(nullLite));

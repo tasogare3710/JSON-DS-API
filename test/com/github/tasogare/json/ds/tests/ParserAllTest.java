@@ -15,12 +15,7 @@ import com.github.tasogare.json.ds.parser.SourceOfZeroTest;
 import com.github.tasogare.json.ds.parser.TokenStreamTest;
 
 @RunWith(Suite.class)
-@SuiteClasses({
-    ParserTest.class,
-    IdentifierTest.class,
-    ReaderToSource.class,
-    SourceOfZeroTest.class,
-    TokenStreamTest.class
-})
+@SuiteClasses({ParserTest.class, IdentifierTest.class, ReaderToSource.class, SourceOfZeroTest.class,
+    TokenStreamTest.class })
 public class ParserAllTest {
 }

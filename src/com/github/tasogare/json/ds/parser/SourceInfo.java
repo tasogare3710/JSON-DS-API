@@ -4,12 +4,12 @@
 
 package com.github.tasogare.json.ds.parser;
 
+
 /**
- * XXX: 今のところこのクラスを使っているのはParserExceptionだけ
  * <p>
  * このクラスはソースコードの情報を持ちます。
  * <p>
- * {@link ParserException}が発生したときにこのオブジェクトを利用すればソースコードの問題のある箇所を表示することが出来ます。
+ * {@link StaticSemanticsException}が発生したときにこのオブジェクトを利用すればソースコードの問題のある箇所を表示することが出来ます。
  * 
  * <pre>
  * final String name = "ソースコード名";
@@ -18,7 +18,7 @@ package com.github.tasogare.json.ds.parser;
  *     final TokenStream ts = new TokenStream(new Source(r));
  *     final Parser parser = new Parser(ts, name);
  *     parser.parse();
- * } catch (ParserException e) {
+ * } catch (StaticSemanticsException e) {
  *     final SourceInfo info = e.getSourceInfo();
  *     System.err.println(info.getSourceName());
  *     System.err.println("row: " + info.getRow() + " col: " + info.getColumn());
@@ -29,6 +29,7 @@ package com.github.tasogare.json.ds.parser;
  *         sb.append(" ");
  *     }
  *     System.err.println(sb.append("^").toString());
+ *     System.err.println(e.getErrorType().toString());
  *     e.printStackTrace();
  * }
  * </pre>

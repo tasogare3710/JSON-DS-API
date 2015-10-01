@@ -12,28 +12,35 @@ public class AstContext {
     private AstContext() {
     }
 
-    public static TypeNameNode newTypeName(int start, int end, String identifier){
-        return new TypeNameNode(start, end, new NameExpressionNode(start, end, new IdentifierNode(start, end, identifier)));
+    public static TypeNameNode newTypeName(int start, int end, String identifier) {
+        return new TypeNameNode(start, end,
+            new NameExpressionNode(start, end, new IdentifierNode(start, end, identifier)));
     }
 
     /**
      * 
-     * @param startFt start position of FieldType node
-     * @param endFt end position of FieldType node
-     * @param startFn start position of FieldName node
-     * @param endFn end position of FieldName node
-     * @param label label of field
-     * @param te TypeExpression node
+     * @param startFt
+     *            start position of FieldType node
+     * @param endFt
+     *            end position of FieldType node
+     * @param startFn
+     *            start position of FieldName node
+     * @param endFn
+     *            end position of FieldName node
+     * @param label
+     *            label of field
+     * @param te
+     *            TypeExpression node
      * @return
      */
     public static <T extends AstNode & BasicTypeExpressionNode<T>> FieldTypeNode<T> newFieldType(int startFt, int endFt,
-            int startFn, int endFn, String label, TypeExpressionNode<T> te)
+        int startFn, int endFn, String label, TypeExpressionNode<T> te)
     {
         final FieldNameNode.StringLiteral fn = newStringLiteralFieldName(startFn, endFn, label);
         return new FieldTypeNode<T>(startFt, endFt, fn, te);
     }
 
-    public static FieldNameNode.StringLiteral newStringLiteralFieldName(int start, int end, String str){
+    public static FieldNameNode.StringLiteral newStringLiteralFieldName(int start, int end, String str) {
         return new FieldNameNode.StringLiteral(start, end, new StringLiteralNode(start, end, str));
     }
 }

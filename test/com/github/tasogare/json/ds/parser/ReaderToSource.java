@@ -39,11 +39,11 @@ public class ReaderToSource {
     @Test
     public void test() throws IOException {
         final String name = "com/github/tasogare/json/ds/parser/resources/ReaderTest.txt";
-        try(final BufferedReader r = newReader(name, getClass())){
+        try (final BufferedReader r = newReader(name, getClass())) {
             final Source source = new Source(r);
             final CharArrayWriter caw = new CharArrayWriter();
             int codePoint;
-            while((codePoint = source.next()) != Source.EOF){
+            while ((codePoint = source.next()) != Source.EOF) {
                 caw.write(Character.toChars(codePoint));
             }
             System.out.println(caw.toString());

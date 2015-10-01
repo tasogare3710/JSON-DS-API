@@ -159,9 +159,7 @@ public final class Source {
     }
 
     private final String source;
-
     private final int length;
-
     private int position;
 
     /**
@@ -220,12 +218,12 @@ public final class Source {
      * 
      * @param c
      *            unicode character
-     * @throws SourceException
+     * @throws IllegalStateException
      * @throws IndexOutOfBoundsException
      */
-    void mustMatch(final int c) throws SourceException, IndexOutOfBoundsException {
+    void mustMatch(final int c) throws IllegalStateException, IndexOutOfBoundsException {
         if (c != peek()) {
-            throw new SourceException(String.valueOf(c));
+            throw new IllegalStateException(String.valueOf(c));
         }
     }
 
@@ -233,10 +231,10 @@ public final class Source {
      * 
      * @param c
      *            unicode character
-     * @throws SourceException
+     * @throws IllegalStateException
      * @throws IndexOutOfBoundsException
      */
-    void mustMatchWithAdvance(final int c) throws SourceException, IndexOutOfBoundsException {
+    void mustMatchWithAdvance(final int c) throws IllegalStateException, IndexOutOfBoundsException {
         mustMatch(c);
         position += Character.charCount(c);
     }
